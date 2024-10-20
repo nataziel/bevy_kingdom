@@ -95,14 +95,17 @@ fn handle_house(moon: &mut Moon) {
 }
 
 fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> MoonHouse {
+    // Turn weights into a collection we can use choose_weighted on
     let weights_collection: Vec<(MoonHouse, u32)> = weights.clone().into_iter().collect();
 
+    // choose the new house based on the weights
     let new_house: MoonHouse = weights_collection
         .choose_weighted(rng, |item| item.1)
         .unwrap()
         .0
         .clone();
 
+    // Set the weight of the new house to 1, increase the weight of each other house by 1
     for (house, weight) in weights.iter_mut() {
         if *house == new_house {
             *weight = 1;
@@ -124,6 +127,7 @@ impl Plugin for MoonPlugin {
 }
 
 fn add_moon(mut commands: Commands) {
+    // Construct weights map here because can't do it as a const
     use MoonHouse::*;
     let mut house_weights_map: HashMap<MoonHouse, u32> = HashMap::new();
     house_weights_map.insert(Dark, 1);
@@ -151,5 +155,8 @@ fn handle_moon(mut query: Query<&mut Moon>) {
 
     handle_house(&mut moon);
 
-    println!("Moon phase: {:?} in Hight House {:?}", moon.phase, moon.house);
+    println!(
+        "Moon phase: {:?} in High House {:?}",
+        moon.phase, moon.house
+    );
 }
