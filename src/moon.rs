@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use rand::prelude::*;
 
 const TRANSITION_RANGE: u32 = 29;
@@ -10,6 +11,7 @@ pub struct Moon {
     pub house: MoonHouse,
     transition_range: u32,
     transition_threshold: u32,
+    house_weights: HashMap<MoonHouse, u32>,
 }
 
 impl Moon {
@@ -18,12 +20,14 @@ impl Moon {
         house: MoonHouse,
         transition_range: u32,
         transition_threshold: u32,
+        house_weights: HashMap<MoonHouse, u32>,
     ) -> Self {
         Self {
             phase,
             house,
             transition_range,
             transition_threshold,
+            house_weights,
         }
     }
 }
@@ -56,7 +60,7 @@ impl MoonPhase {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub enum MoonHouse {
     Dark,
     Light,
@@ -94,13 +98,31 @@ impl Plugin for MoonPlugin {
 }
 
 fn add_moon(mut commands: Commands) {
-    commands.spawn(Moon::new(MoonPhase::WaningCrescent, MoonHouse::Dark, TRANSITION_RANGE, TRANSITION_THRESHOLD));
+    use MoonHouse::*;
+    let mut house_weights_map: HashMap<MoonHouse, u32> = HashMap::new();
+    house_weights_map.insert(Dark, 100);
+    house_weights_map.insert(Light, 100);
+    house_weights_map.insert(Fire, 100);
+    house_weights_map.insert(Water, 100);
+    house_weights_map.insert(Wind, 100);
+    house_weights_map.insert(Earth, 100);
+    house_weights_map.insert(Death, 100);
+    house_weights_map.insert(Storm, 100);
+
+    commands.spawn(Moon::new(
+        MoonPhase::WaningCrescent,
+        MoonHouse::Dark,
+        TRANSITION_RANGE,
+        TRANSITION_THRESHOLD,
+        house_weights_map,
+    ));
 }
 
 fn handle_moon(mut query: Query<&mut Moon>) {
     let mut moon = query.single_mut();
 
     moon.phase = moon.phase.next();
+    println!("Moon phase: {:?}", moon.phase);
 
     let mut rng = thread_rng();
     let transition_value: u32 = rng.gen_range(0..moon.transition_range);
@@ -112,7 +134,6 @@ fn handle_moon(mut query: Query<&mut Moon>) {
         println!("Moon transitioned to house {:?}", moon.house)
     } else {
         moon.transition_range += 1;
-        println!("{:?}", moon.transition_range)
     };
 
     println!("{:?}", moon)
