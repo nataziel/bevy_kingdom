@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use rand::prelude::*;
 
-const TRANSITION_RANGE: u32 = 29;
+const TRANSITION_RANGE_START: u32 = 15;
 const TRANSITION_THRESHOLD: u32 = 30;
 
 #[derive(Component, Debug)]
@@ -32,7 +32,7 @@ impl Moon {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum MoonPhase {
     New,
     WaxingCrescent,
@@ -60,7 +60,7 @@ impl MoonPhase {
     }
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub enum MoonHouse {
     Dark,
     Light,
@@ -72,20 +72,46 @@ pub enum MoonHouse {
     Storm,
 }
 
-impl MoonHouse {
-    pub fn next(&self) -> Self {
-        use MoonHouse::*;
-        match *self {
-            Dark => Light,
-            Light => Fire,
-            Fire => Water,
-            Water => Wind,
-            Wind => Earth,
-            Earth => Death,
-            Death => Storm,
-            Storm => Dark,
-        }
+fn handle_house(moon: &mut Moon) {
+    let mut rng = thread_rng();
+
+    let mut transition_value: u32 = rng.gen_range(0..moon.transition_range);
+
+    if moon.phase == MoonPhase::New {
+        transition_value += 5
     }
+
+    if transition_value >= moon.transition_threshold {
+        if (transition_value - 5 < moon.transition_threshold) & (moon.phase == MoonPhase::New) {
+            println!("House transitioned early due to the New Moon!")
+        }
+        moon.transition_range = TRANSITION_RANGE_START;
+        moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
+
+        println!("Moon transitioned to House {:?}", moon.house)
+    } else {
+        moon.transition_range += 1;
+    };
+}
+
+fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> MoonHouse {
+    let weights_collection: Vec<(MoonHouse, u32)> = weights.clone().into_iter().collect();
+
+    let new_house: MoonHouse = weights_collection
+        .choose_weighted(rng, |item| item.1)
+        .unwrap()
+        .0
+        .clone();
+
+    for (house, weight) in weights.iter_mut() {
+        if *house == new_house {
+            *weight = 1;
+        } else {
+            *weight += 1
+        };
+    }
+
+    return new_house;
 }
 
 pub struct MoonPlugin;
@@ -100,19 +126,19 @@ impl Plugin for MoonPlugin {
 fn add_moon(mut commands: Commands) {
     use MoonHouse::*;
     let mut house_weights_map: HashMap<MoonHouse, u32> = HashMap::new();
-    house_weights_map.insert(Dark, 100);
-    house_weights_map.insert(Light, 100);
-    house_weights_map.insert(Fire, 100);
-    house_weights_map.insert(Water, 100);
-    house_weights_map.insert(Wind, 100);
-    house_weights_map.insert(Earth, 100);
-    house_weights_map.insert(Death, 100);
-    house_weights_map.insert(Storm, 100);
+    house_weights_map.insert(Dark, 1);
+    house_weights_map.insert(Light, 1);
+    house_weights_map.insert(Fire, 1);
+    house_weights_map.insert(Water, 1);
+    house_weights_map.insert(Wind, 1);
+    house_weights_map.insert(Earth, 1);
+    house_weights_map.insert(Death, 1);
+    house_weights_map.insert(Storm, 1);
 
     commands.spawn(Moon::new(
         MoonPhase::WaningCrescent,
         MoonHouse::Dark,
-        TRANSITION_RANGE,
+        TRANSITION_RANGE_START,
         TRANSITION_THRESHOLD,
         house_weights_map,
     ));
@@ -122,19 +148,8 @@ fn handle_moon(mut query: Query<&mut Moon>) {
     let mut moon = query.single_mut();
 
     moon.phase = moon.phase.next();
-    println!("Moon phase: {:?}", moon.phase);
 
-    let mut rng = thread_rng();
-    let transition_value: u32 = rng.gen_range(0..moon.transition_range);
+    handle_house(&mut moon);
 
-    if transition_value >= moon.transition_threshold {
-        moon.transition_range = 30;
-        moon.house = moon.house.next();
-
-        println!("Moon transitioned to house {:?}", moon.house)
-    } else {
-        moon.transition_range += 1;
-    };
-
-    println!("{:?}", moon)
+    println!("Moon phase: {:?} in Hight House {:?}", moon.phase, moon.house);
 }
