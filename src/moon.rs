@@ -1,13 +1,30 @@
 use bevy::prelude::*;
+use rand::prelude::*;
+
+const TRANSITION_RANGE: u32 = 29;
+const TRANSITION_THRESHOLD: u32 = 30;
 
 #[derive(Component, Debug)]
 pub struct Moon {
     pub phase: MoonPhase,
+    pub house: MoonHouse,
+    transition_range: u32,
+    transition_threshold: u32,
 }
 
 impl Moon {
-    pub fn new(phase: MoonPhase) -> Self {
-        Self { phase }
+    pub fn new(
+        phase: MoonPhase,
+        house: MoonHouse,
+        transition_range: u32,
+        transition_threshold: u32,
+    ) -> Self {
+        Self {
+            phase,
+            house,
+            transition_range,
+            transition_threshold,
+        }
     }
 }
 
@@ -39,6 +56,34 @@ impl MoonPhase {
     }
 }
 
+#[derive(Debug)]
+pub enum MoonHouse {
+    Dark,
+    Light,
+    Fire,
+    Water,
+    Wind,
+    Earth,
+    Death,
+    Storm,
+}
+
+impl MoonHouse {
+    pub fn next(&self) -> Self {
+        use MoonHouse::*;
+        match *self {
+            Dark => Light,
+            Light => Fire,
+            Fire => Water,
+            Water => Wind,
+            Wind => Earth,
+            Earth => Death,
+            Death => Storm,
+            Storm => Dark,
+        }
+    }
+}
+
 pub struct MoonPlugin;
 
 impl Plugin for MoonPlugin {
@@ -49,13 +94,26 @@ impl Plugin for MoonPlugin {
 }
 
 fn add_moon(mut commands: Commands) {
-    commands.spawn(Moon::new(MoonPhase::WaningCrescent));
+    commands.spawn(Moon::new(MoonPhase::WaningCrescent, MoonHouse::Dark, TRANSITION_RANGE, TRANSITION_THRESHOLD));
 }
 
 fn handle_moon(mut query: Query<&mut Moon>) {
     let mut moon = query.single_mut();
 
     moon.phase = moon.phase.next();
+
+    let mut rng = thread_rng();
+    let transition_value: u32 = rng.gen_range(0..moon.transition_range);
+
+    if transition_value >= moon.transition_threshold {
+        moon.transition_range = 30;
+        moon.house = moon.house.next();
+
+        println!("Moon transitioned to house {:?}", moon.house)
+    } else {
+        moon.transition_range += 1;
+        println!("{:?}", moon.transition_range)
+    };
 
     println!("{:?}", moon)
 }
