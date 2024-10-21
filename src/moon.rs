@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use rand::prelude::*;
+use std::fmt;
 
 const TRANSITION_RANGE_START: u32 = 15;
 const TRANSITION_THRESHOLD: u32 = 30;
@@ -74,6 +75,12 @@ impl MoonPhase {
     }
 }
 
+impl fmt::Display for MoonPhase {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.str())
+    }
+}
+
 #[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub enum MoonHouse {
     Dark,
@@ -84,6 +91,8 @@ pub enum MoonHouse {
     Earth,
     Death,
     Storm,
+    Dream,
+    Wild,
 }
 
 fn handle_house(moon: &mut Moon) {
@@ -91,6 +100,7 @@ fn handle_house(moon: &mut Moon) {
 
     let mut transition_value: u32 = rng.gen_range(0..moon.transition_range);
 
+    // Bonus to transition if it's a New Moon
     if moon.phase == MoonPhase::New {
         transition_value += 5
     }
@@ -152,6 +162,8 @@ fn add_moon(mut commands: Commands) {
     house_weights_map.insert(Earth, 1);
     house_weights_map.insert(Death, 1);
     house_weights_map.insert(Storm, 1);
+    house_weights_map.insert(Dream, 1);
+    house_weights_map.insert(Wild, 1);
 
     commands.spawn(Moon::new(
         MoonPhase::WaningCrescent,
@@ -169,5 +181,5 @@ fn handle_moon(mut query: Query<&mut Moon>) {
 
     handle_house(&mut moon);
 
-    info!("{} Moon in High House {:?}", moon.phase.str(), moon.house);
+    info!("{} Moon in High House {:?}", moon.phase, moon.house);
 }

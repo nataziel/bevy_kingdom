@@ -10,7 +10,7 @@ struct Name {
 }
 
 fn hello_world() {
-    println!("Hello world!");
+    info!("Hello world!");
 }
 
 fn add_people(mut commands: Commands) {
@@ -39,7 +39,7 @@ fn add_people(mut commands: Commands) {
 
 fn greet_people(query: Query<&Name, With<Person>>) {
     for name in &query {
-        println!("Hello {} {}!", name.first, name.last)
+        info!("Hello {} {}!", name.first, name.last)
     }
 }
 

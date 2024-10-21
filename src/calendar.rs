@@ -1,3 +1,5 @@
+use std::fmt;
+
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 
@@ -18,6 +20,28 @@ pub enum MonthName {
     Floreal,
     Prairial,
     SansCulottides,
+}
+
+impl fmt::Display for MonthName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use MonthName::*;
+        let out_string = match *self {
+            Messidor => "Messidor".to_string(),
+            Termidor => "Termidor".to_string(),
+            Fructidor => "Fructidor".to_string(),
+            Vendemiaire => "Vendemiaire".to_string(),
+            Brumaire => "Brumaire".to_string(),
+            Frimaire => "Frimaire".to_string(),
+            Nivose => "Nivose".to_string(),
+            Pluviose => "Pluviose".to_string(),
+            Ventose => "Ventose".to_string(),
+            Germinal => "Germinal".to_string(),
+            Floreal => "Floreal".to_string(),
+            Prairial => "Prairial".to_string(),
+            SansCulottides => "Sans Culottides".to_string(),
+        };
+        write!(f, "{}", out_string)
+    }
 }
 
 impl MonthName {
@@ -71,6 +95,18 @@ impl Calendar {
     }
 }
 
+impl fmt::Display for Calendar {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{month_day} {month_name}, Year {year}",
+            month_day = self.month_day,
+            month_name = self.month,
+            year = self.year
+        )
+    }
+}
+
 pub struct DatePlugin;
 
 impl Plugin for DatePlugin {
@@ -110,7 +146,8 @@ fn advance_date(mut query: Query<&mut Calendar>) {
 
     handle_years(&mut calendar);
 
-    debug!("{:?}", calendar)
+    debug!("{:?}", calendar);
+    info!("{}", *calendar)
 }
 
 fn handle_months(calendar: &mut Mut<'_, Calendar>) {
@@ -121,7 +158,7 @@ fn handle_months(calendar: &mut Mut<'_, Calendar>) {
         calendar.month = calendar.month.next();
         calendar.month_day = 1;
         info!(
-            "Month {:?} ended, transitioned to next month {:?}",
+            "Month {} ended, transitioned to next month {}",
             current_month, calendar.month
         )
     }
@@ -135,7 +172,7 @@ fn handle_years(calendar: &mut Mut<'_, Calendar>) {
         calendar.year_day = 1;
 
         info!(
-            "Year {:?} ended, transitioned to Year {:?}",
+            "Year {} ended, transitioned to Year {}",
             calendar.year - 1,
             calendar.year
         )
