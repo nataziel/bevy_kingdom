@@ -8,6 +8,7 @@ enum MonthName {
     Messidor,
     Termidor,
     Fructidor,
+    Vendemiaire,
     Brumaire,
     Frimaire,
     Nivose,
@@ -16,7 +17,7 @@ enum MonthName {
     Germinal,
     Floreal,
     Prairial,
-    SansCullotides,
+    SansCulottides,
 }
 
 impl MonthName {
@@ -26,7 +27,8 @@ impl MonthName {
             // todo: fix month lengths/transitions??
             Messidor => Termidor,
             Termidor => Fructidor,
-            Fructidor => Brumaire,
+            Fructidor => Vendemiaire,
+            Vendemiaire => Brumaire,
             Brumaire => Frimaire,
             Frimaire => Nivose,
             Nivose => Pluviose,
@@ -34,8 +36,8 @@ impl MonthName {
             Ventose => Germinal,
             Germinal => Floreal,
             Floreal => Prairial,
-            Prairial => SansCullotides,
-            SansCullotides => Messidor,
+            Prairial => SansCulottides,
+            SansCulottides => Messidor,
         }
     }
 }
@@ -85,6 +87,7 @@ fn add_calendar(mut commands: Commands) {
     month_map.insert(Messidor, 30);
     month_map.insert(Termidor, 30);
     month_map.insert(Fructidor, 30);
+    month_map.insert(Vendemiaire, 30);
     month_map.insert(Brumaire, 30);
     month_map.insert(Frimaire, 30);
     month_map.insert(Nivose, 30);
@@ -93,7 +96,7 @@ fn add_calendar(mut commands: Commands) {
     month_map.insert(Germinal, 30);
     month_map.insert(Floreal, 30);
     month_map.insert(Prairial, 30);
-    month_map.insert(SansCullotides, 5);
+    month_map.insert(SansCulottides, 5);
 
     let calendar = Calendar::new(0, 0, Messidor, 0, YEAR_LENGTH, month_map);
     println!("{:?}", &calendar);
@@ -104,7 +107,14 @@ fn add_calendar(mut commands: Commands) {
 fn advance_date(mut query: Query<&mut Calendar>) {
     let mut calendar = query.single_mut();
 
-    //handle months
+    handle_months(&mut calendar);
+
+    handle_years(&mut calendar);
+
+    println!("{:?}", calendar)
+}
+
+fn handle_months(calendar: &mut Mut<'_, Calendar>) {
     let current_month: MonthName = calendar.month.clone();
     calendar.month_day += 1;
 
@@ -112,18 +122,23 @@ fn advance_date(mut query: Query<&mut Calendar>) {
         calendar.month = calendar.month.next();
         calendar.month_day = 1;
         println!(
-            "Month {:?} transitioned to next month {:?}",
+            "Month {:?} ended, transitioned to next month {:?}",
             current_month, calendar.month
         )
     }
+}
 
-    //handler years
+fn handle_years(calendar: &mut Mut<'_, Calendar>) {
     calendar.year_day += 1;
 
     if calendar.year_day > calendar.year_length {
         calendar.year += 1;
-        calendar.year_day = 1
-    }
+        calendar.year_day = 1;
 
-    println!("{:?}", calendar)
+        println!(
+            "Year {:?} ended, transitioned to Year {:?}",
+            calendar.year - 1,
+            calendar.year
+        )
+    }
 }
