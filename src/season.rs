@@ -19,6 +19,26 @@ impl Season {
             Spring => Summer,
         }
     }
+
+    pub fn month_to_season(month: MonthName) -> Self {
+        use crate::calendar::MonthName::*;
+        use Season::*;
+        match month {
+            Messidor => Summer,
+            Termidor => Summer,
+            Fructidor => Summer,
+            Vendemiaire => Autumn,
+            Brumaire => Autumn,
+            Frimaire => Autumn,
+            Nivose => Winter,
+            Pluviose => Winter,
+            Ventose => Winter,
+            Germinal => Spring,
+            Floreal => Spring,
+            Prairial => Spring,
+            SansCulottides => Spring,
+        }
+    }
 }
 
 pub struct SeasonPlugin;
@@ -38,7 +58,7 @@ fn handle_season(mut season_query: Query<&mut Season>, calendar_query: Query<&Ca
     let calendar = calendar_query.single();
     let mut season = season_query.single_mut();
 
-    *season = season.next();
+    *season = Season::month_to_season(calendar.month);
 
     debug!("{:?}", *season)
 }

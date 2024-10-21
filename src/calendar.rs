@@ -45,7 +45,7 @@ impl MonthName {
 pub struct Calendar {
     year: u32,
     year_day: u32,
-    month: MonthName,
+    pub month: MonthName,
     month_day: u32,
     year_length: u32,
     month_map: HashMap<MonthName, u32>,
