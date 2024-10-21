@@ -58,6 +58,20 @@ impl MoonPhase {
             WaningCrescent => New,
         }
     }
+
+    pub fn str(&self) -> String {
+        use MoonPhase::*;
+        match *self {
+            New => "New".to_string(),
+            WaxingCrescent => "Waxing Crescent".to_string(),
+            FirstQuarter => "First Quarter".to_string(),
+            WaxingGibbous => "Waxing Gibbous".to_string(),
+            Full => "Full".to_string(),
+            WaningGibbous => "Waning Gibbous".to_string(),
+            LastQuarter => "Last Quarter".to_string(),
+            WaningCrescent => "Waning Crescent".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone)]
@@ -83,12 +97,12 @@ fn handle_house(moon: &mut Moon) {
 
     if transition_value >= moon.transition_threshold {
         if (transition_value - 5 < moon.transition_threshold) & (moon.phase == MoonPhase::New) {
-            println!("House transitioned early due to the New Moon!")
+            info!("House transitioned early due to the New Moon!")
         }
         moon.transition_range = TRANSITION_RANGE_START;
         moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
 
-        println!("Moon transitioned to House {:?}", moon.house)
+        info!("Moon transitioned to House {:?}", moon.house)
     } else {
         moon.transition_range += 1;
     };
@@ -155,8 +169,5 @@ fn handle_moon(mut query: Query<&mut Moon>) {
 
     handle_house(&mut moon);
 
-    println!(
-        "Moon phase: {:?} in High House {:?}",
-        moon.phase, moon.house
-    );
+    info!("{} Moon in High House {:?}", moon.phase.str(), moon.house);
 }

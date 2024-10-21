@@ -40,5 +40,5 @@ fn handle_season(mut season_query: Query<&mut Season>, calendar_query: Query<&Ca
 
     *season = season.next();
 
-    println!("{:?}", season)
+    debug!("{:?}", *season)
 }

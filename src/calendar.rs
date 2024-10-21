@@ -3,8 +3,8 @@ use bevy::utils::HashMap;
 
 const YEAR_LENGTH: u32 = 365;
 
-#[derive(Debug, Eq, Hash, PartialEq, Clone)]
-enum MonthName {
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
+pub enum MonthName {
     Messidor,
     Termidor,
     Fructidor,
@@ -24,7 +24,6 @@ impl MonthName {
     pub fn next(&self) -> Self {
         use MonthName::*;
         match *self {
-            // todo: fix month lengths/transitions??
             Messidor => Termidor,
             Termidor => Fructidor,
             Fructidor => Vendemiaire,
@@ -99,7 +98,7 @@ fn add_calendar(mut commands: Commands) {
     month_map.insert(SansCulottides, 5);
 
     let calendar = Calendar::new(0, 0, Messidor, 0, YEAR_LENGTH, month_map);
-    println!("{:?}", &calendar);
+    debug!("{:?}", &calendar);
 
     commands.spawn(calendar);
 }
@@ -111,17 +110,17 @@ fn advance_date(mut query: Query<&mut Calendar>) {
 
     handle_years(&mut calendar);
 
-    println!("{:?}", calendar)
+    debug!("{:?}", calendar)
 }
 
 fn handle_months(calendar: &mut Mut<'_, Calendar>) {
-    let current_month: MonthName = calendar.month.clone();
+    let current_month: MonthName = calendar.month;
     calendar.month_day += 1;
 
     if calendar.month_day > calendar.month_map[&current_month] {
         calendar.month = calendar.month.next();
         calendar.month_day = 1;
-        println!(
+        info!(
             "Month {:?} ended, transitioned to next month {:?}",
             current_month, calendar.month
         )
@@ -135,7 +134,7 @@ fn handle_years(calendar: &mut Mut<'_, Calendar>) {
         calendar.year += 1;
         calendar.year_day = 1;
 
-        println!(
+        info!(
             "Year {:?} ended, transitioned to Year {:?}",
             calendar.year - 1,
             calendar.year
