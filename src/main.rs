@@ -10,7 +10,7 @@ use bevy::{
 };
 use calendar::DatePlugin;
 use moon::MoonPlugin;
-use people::HelloPlugin;
+use people::{HelloPlugin, GiveBirthEvent};
 use season::SeasonPlugin;
 
 fn main() {
@@ -25,5 +25,6 @@ fn main() {
             filter: "".to_string(),
             custom_layer: |_| None,
         })
+        .add_event::<GiveBirthEvent>()
         .run();
 }
