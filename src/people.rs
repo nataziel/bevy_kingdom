@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH};
+use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD};
 
 #[derive(Component, Debug)]
 pub struct Person;
@@ -44,7 +44,7 @@ fn add_people(mut commands: Commands) {
                 last: "Morales".to_string(),
             },
             ChildBearing,
-            Pregnancy::new(HUMAN_PREGNANCY_LENGTH, jack),
+            Pregnancy::new(HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, jack),
         ))
         .id();
 
