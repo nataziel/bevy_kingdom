@@ -1,48 +1,25 @@
 use bevy::prelude::*;
 
-#[derive(Component, Debug)]
-struct Person;
+use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH};
 
 #[derive(Component, Debug)]
-struct Name {
-    first: String,
-    last: String,
+pub struct Person;
+
+#[derive(Component, Debug)]
+pub struct Name {
+    pub first: String,
+    pub last: String,
 }
 
 #[derive(Component, Debug)]
-struct Parents {
-    list: Vec<Entity>,
+pub struct Parents {
+    pub list: Vec<Entity>,
 }
 
 #[derive(Component, Debug)]
-struct Children {
-    list: Vec<Entity>,
+pub struct Children {
+    pub list: Vec<Entity>,
 }
-
-#[derive(Component, Debug)]
-struct ChildBearing;
-
-const HUMAN_PREGNANCY_LENGTH: i32 = 266;
-
-#[derive(Component, Debug)]
-struct Pregnancy {
-    mean_term: i32,
-    progress: i32,
-    father: Entity,
-}
-
-impl Pregnancy {
-    fn new(mean_term: i32, father: Entity) -> Self {
-        Pregnancy {
-            mean_term,
-            progress: 0,
-            father,
-        }
-    }
-}
-
-#[derive(Event, Debug)]
-pub struct GiveBirthEvent(Entity);
 
 fn hello_world() {
     info!("Hello world!");
@@ -168,32 +145,6 @@ fn greet_people_with_parents(
     }
 }
 
-fn handle_pregnancy(
-    mut ev_give_birth: EventWriter<GiveBirthEvent>,
-    mut query: Query<(Entity, &Name, &mut Pregnancy), (With<Person>, With<ChildBearing>)>,
-) {
-    for (entity, name, mut pregnancy) in &mut query {
-        pregnancy.progress += 1;
-        info!(
-            "{} {} is pregnant, {}/{}",
-            name.first, name.last, pregnancy.progress, pregnancy.mean_term
-        );
-        if pregnancy.progress >= pregnancy.mean_term {
-            ev_give_birth.send(GiveBirthEvent(entity));
-            // TODO: remove pregnancy trait?
-            pregnancy.progress = 0;
-        }
-    }
-}
-
-fn debug_givebirth(mut ev_give_birth: EventReader<GiveBirthEvent>) {
-    // TODO: make this create a new entity, set parents etc.
-    // TODO: should probably move the pregnancy stuff to a separate file
-    for event in ev_give_birth.read() {
-        debug!("Entity {:?} gave birth!", event.0)
-    }
-}
-
 fn update_people(mut query: Query<&mut Name, With<Person>>) {
     for mut name in &mut query {
         if name.first == "Paulina" && name.last == "Morales" {
@@ -219,8 +170,6 @@ impl Plugin for HelloPlugin {
                     greet_people_with_parents,
                 )
                     .chain(),
-                handle_pregnancy,
-                debug_givebirth,
             ),
         );
     }

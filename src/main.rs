@@ -1,6 +1,7 @@
 mod calendar;
 mod moon;
 mod people;
+mod reproduction;
 mod season;
 mod weather;
 
@@ -10,13 +11,15 @@ use bevy::{
 };
 use calendar::DatePlugin;
 use moon::MoonPlugin;
-use people::{HelloPlugin, GiveBirthEvent};
+use people::HelloPlugin;
+use reproduction::{GiveBirthEvent, ReproductionPlugin};
 use season::SeasonPlugin;
 
 fn main() {
     App::new()
         .add_plugins(MinimalPlugins)
         .add_plugins(HelloPlugin)
+        .add_plugins(ReproductionPlugin)
         .add_plugins(DatePlugin)
         .add_plugins(MoonPlugin)
         .add_plugins(SeasonPlugin)
