@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashSet};
 
 use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD};
 
@@ -13,12 +13,17 @@ pub struct Name {
 
 #[derive(Component, Debug)]
 pub struct Parents {
-    pub list: Vec<Entity>,
+    pub list: HashSet<Entity>,
 }
 
 #[derive(Component, Debug)]
 pub struct Children {
-    pub list: Vec<Entity>,
+    pub list: HashSet<Entity>,
+}
+
+#[derive(Component, Debug)]
+pub struct Siblings {
+    pub list: HashSet<Entity>,
 }
 
 fn hello_world() {
@@ -56,7 +61,7 @@ fn add_people(mut commands: Commands) {
                 last: "Morales-Allan".to_string(),
             },
             Parents {
-                list: vec![jack, pau],
+                list: HashSet::from([jack, pau]),
             },
         ))
         .id();
@@ -69,16 +74,23 @@ fn add_people(mut commands: Commands) {
                 last: "Morales-Allan".to_string(),
             },
             Parents {
-                list: vec![jack, pau],
+                list: HashSet::from([jack, pau]),
             },
         ))
         .id();
 
     commands.entity(jack).insert(Children {
-        list: vec![albie, pip],
+        list: HashSet::from([albie, pip]),
     });
     commands.entity(pau).insert(Children {
-        list: vec![albie, pip],
+        list: HashSet::from([albie, pip]),
+    });
+
+    commands.entity(albie).insert(Siblings {
+        list: HashSet::from([pip]),
+    });
+    commands.entity(pip).insert(Siblings {
+        list: HashSet::from([albie]),
     });
 
     let jacob = commands
@@ -98,13 +110,15 @@ fn add_people(mut commands: Commands) {
                 first: "Pepsi".to_string(),
                 last: "Wilmot".to_string(),
             },
-            Parents { list: vec![jacob] },
+            Parents {
+                list: HashSet::from([jacob]),
+            },
         ))
         .id();
 
-    commands
-        .entity(jacob)
-        .insert(Children { list: vec![pepsi] });
+    commands.entity(jacob).insert(Children {
+        list: HashSet::from([pepsi]),
+    });
 }
 
 fn greet_people(query: Query<&Name, With<Person>>) {
@@ -130,8 +144,8 @@ fn greet_people_with_children(
 }
 
 fn greet_people_with_parents(
-    query_parents: Query<(&Name, &Children), With<Person>>,
     query_children: Query<(&Name, &Parents), With<Person>>,
+    query_parents: Query<(&Name, &Children), With<Person>>,
 ) {
     for (name, parents) in &query_children {
         info!("Hello {} {}!", name.first, name.last);
@@ -140,6 +154,17 @@ fn greet_people_with_parents(
             info!(
                 "{} {} has a parent called {} {}",
                 name.first, name.last, parent_name.first, parent_name.last,
+            )
+        }
+    }
+}
+
+fn greet_people_with_siblings(query: Query<(&Name, &Siblings), With<Person>>) {
+    for (name, siblings) in &query {
+        for (sibling_name, _) in query.iter_many(&siblings.list) {
+            info!(
+                "{} {} has a sibling: {} {}",
+                name.first, name.last, sibling_name.first, sibling_name.last
             )
         }
     }
@@ -168,6 +193,7 @@ impl Plugin for HelloPlugin {
                     greet_people,
                     greet_people_with_children,
                     greet_people_with_parents,
+                    greet_people_with_siblings,
                 )
                     .chain(),
             ),
