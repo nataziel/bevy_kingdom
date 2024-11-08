@@ -95,6 +95,30 @@ pub enum MoonHouse {
     Wild,
 }
 
+impl MoonHouse {
+    pub fn str(&self) -> String {
+        use MoonHouse::*;
+        match *self {
+            Dark => "Dark".to_string(),
+            Light => "Light".to_string(),
+            Fire => "Fire".to_string(),
+            Water => "Water".to_string(),
+            Wind => "Wind".to_string(),
+            Earth => "Earth".to_string(),
+            Death => "Death".to_string(),
+            Storm => "Storm".to_string(),
+            Dream => "Dream".to_string(),
+            Wild => "Wild".to_string(),
+        }
+    }
+}
+
+impl fmt::Display for MoonHouse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.str())
+    }
+}
+
 fn handle_house(moon: &mut Moon) {
     let mut rng = thread_rng();
 
@@ -112,7 +136,7 @@ fn handle_house(moon: &mut Moon) {
         moon.transition_range = TRANSITION_RANGE_START;
         moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
 
-        info!("Moon transitioned to House {:?}", moon.house)
+        info!("Moon transitioned to House {}", moon.house)
     } else {
         moon.transition_range += 1;
     };
@@ -181,5 +205,5 @@ fn handle_moon(mut query: Query<&mut Moon>) {
 
     handle_house(&mut moon);
 
-    info!("{} Moon in High House {:?}", moon.phase, moon.house);
+    info!("{} Moon in High House {}", moon.phase, moon.house);
 }
