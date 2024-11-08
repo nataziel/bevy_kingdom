@@ -106,6 +106,7 @@ fn handle_givebirth(
             ))
             .id();
 
+        // TODO: maybe this should be a separate system/event
         // insert the new child into the set of siblings for each of their siblings
         let mut siblings_iter = query_siblings.iter_many_mut(&new_child_siblings);
         while let Some(mut siblings_of_sibling) = siblings_iter.fetch_next() {

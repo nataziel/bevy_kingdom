@@ -100,6 +100,12 @@ fn add_people(mut commands: Commands) {
                 first: "Jacob".to_string(),
                 last: "Wilmot".to_string(),
             },
+            Parents {
+                list: HashSet::new(),
+            },
+            Siblings {
+                list: HashSet::new(),
+            }
         ))
         .id();
 
@@ -113,6 +119,9 @@ fn add_people(mut commands: Commands) {
             Parents {
                 list: HashSet::from([jacob]),
             },
+            Siblings {
+                list: HashSet::new(),
+            }
         ))
         .id();
 
