@@ -25,20 +25,20 @@ pub enum MonthName {
 impl fmt::Display for MonthName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use MonthName::*;
-        let out_string = match *self {
-            Messidor => "Messidor".to_string(),
-            Termidor => "Termidor".to_string(),
-            Fructidor => "Fructidor".to_string(),
-            Vendemiaire => "Vendemiaire".to_string(),
-            Brumaire => "Brumaire".to_string(),
-            Frimaire => "Frimaire".to_string(),
-            Nivose => "Nivose".to_string(),
-            Pluviose => "Pluviose".to_string(),
-            Ventose => "Ventose".to_string(),
-            Germinal => "Germinal".to_string(),
-            Floreal => "Floreal".to_string(),
-            Prairial => "Prairial".to_string(),
-            SansCulottides => "Sans Culottides".to_string(),
+        let out_string: String = match *self {
+            Messidor => "Messidor".into(),
+            Termidor => "Termidor".into(),
+            Fructidor => "Fructidor".into(),
+            Vendemiaire => "Vendemiaire".into(),
+            Brumaire => "Brumaire".into(),
+            Frimaire => "Frimaire".into(),
+            Nivose => "Nivose".into(),
+            Pluviose => "Pluviose".into(),
+            Ventose => "Ventose".into(),
+            Germinal => "Germinal".into(),
+            Floreal => "Floreal".into(),
+            Prairial => "Prairial".into(),
+            SansCulottides => "Sans Culottides".into(),
         };
         write!(f, "{}", out_string)
     }

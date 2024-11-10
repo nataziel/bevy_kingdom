@@ -63,14 +63,14 @@ impl MoonPhase {
     pub fn str(&self) -> String {
         use MoonPhase::*;
         match *self {
-            New => "New".to_string(),
-            WaxingCrescent => "Waxing Crescent".to_string(),
-            FirstQuarter => "First Quarter".to_string(),
-            WaxingGibbous => "Waxing Gibbous".to_string(),
-            Full => "Full".to_string(),
-            WaningGibbous => "Waning Gibbous".to_string(),
-            LastQuarter => "Last Quarter".to_string(),
-            WaningCrescent => "Waning Crescent".to_string(),
+            New => "New".into(),
+            WaxingCrescent => "Waxing Crescent".into(),
+            FirstQuarter => "First Quarter".into(),
+            WaxingGibbous => "Waxing Gibbous".into(),
+            Full => "Full".into(),
+            WaningGibbous => "Waning Gibbous".into(),
+            LastQuarter => "Last Quarter".into(),
+            WaningCrescent => "Waning Crescent".into(),
         }
     }
 }
@@ -99,16 +99,16 @@ impl MoonHouse {
     pub fn str(&self) -> String {
         use MoonHouse::*;
         match *self {
-            Dark => "Dark".to_string(),
-            Light => "Light".to_string(),
-            Fire => "Fire".to_string(),
-            Water => "Water".to_string(),
-            Wind => "Wind".to_string(),
-            Earth => "Earth".to_string(),
-            Death => "Death".to_string(),
-            Storm => "Storm".to_string(),
-            Dream => "Dream".to_string(),
-            Wild => "Wild".to_string(),
+            Dark => "Dark".into(),
+            Light => "Light".into(),
+            Fire => "Fire".into(),
+            Water => "Water".into(),
+            Wind => "Wind".into(),
+            Earth => "Earth".into(),
+            Death => "Death".into(),
+            Storm => "Storm".into(),
+            Dream => "Dream".into(),
+            Wild => "Wild".into(),
         }
     }
 }

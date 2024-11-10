@@ -25,7 +25,7 @@ fn main() {
         .add_plugins(SeasonPlugin)
         .add_plugins(LogPlugin {
             level: Level::DEBUG,
-            filter: "".to_string(),
+            filter: "".into(),
             custom_layer: |_| None,
         })
         .add_event::<GiveBirthEvent>()
