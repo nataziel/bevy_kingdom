@@ -1,3 +1,4 @@
+use crate::life::DeathEvent;
 use crate::people::{Children, Name, Person, PersonBundle, Siblings};
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
@@ -175,16 +176,21 @@ fn handle_successful_birth(
 }
 
 fn handle_unsuccessful_birth(
-    mut commands: Commands,
     mut ev_unsuccessful_birth: EventReader<UnsuccessfulBirthEvent>,
-    mut query_parents: Query<(&mut Children, &Name)>,
-    mut query_siblings: Query<&mut Siblings>,
+    mut ev_death: EventWriter<DeathEvent>,
 ) {
+    // TODO: make some fucked up shit happen
+    // mum dies? baby dies? :(
     for event in ev_unsuccessful_birth.read() {
         debug!("Handling unsuccessful birth {:?}", event);
         debug!("Term Diff: {}", event.term_diff);
-        // TODO: make some fucked up shit happen
-        // mum dies? baby dies? :(
+        if event.term_diff >= 0 {
+            ev_death.send(DeathEvent::new(event.mother));
+            // make the dad get sad?
+        } else {
+            debug!("Term dif too low");
+            // make both mum and dad bet sad
+        }
     }
 }
 

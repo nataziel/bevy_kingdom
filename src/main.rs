@@ -1,4 +1,5 @@
 mod calendar;
+mod life;
 mod moon;
 mod people;
 mod reproduction;
@@ -10,6 +11,7 @@ use bevy::{
     prelude::*,
 };
 use calendar::DatePlugin;
+use life::LifePlugin;
 use moon::MoonPlugin;
 use people::HelloPlugin;
 use reproduction::ReproductionPlugin;
@@ -20,6 +22,7 @@ fn main() {
         .add_plugins(MinimalPlugins)
         .add_plugins(HelloPlugin)
         .add_plugins(ReproductionPlugin)
+        .add_plugins(LifePlugin)
         .add_plugins(DatePlugin)
         .add_plugins(MoonPlugin)
         .add_plugins(SeasonPlugin)

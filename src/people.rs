@@ -1,5 +1,6 @@
 use bevy::{prelude::*, utils::HashSet};
 
+use crate::life::Alive;
 use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD};
 
 #[derive(Component, Debug)]
@@ -29,6 +30,7 @@ pub struct Siblings {
 #[derive(Bundle)]
 pub struct PersonBundle {
     person: Person,
+    alive: Alive,
     name: Name,
     parents: Parents,
     children: Children,
@@ -44,6 +46,7 @@ impl PersonBundle {
     ) -> Self {
         PersonBundle {
             person: Person,
+            alive: Alive,
             name: Name {
                 first: first.into(),
                 last: last.into(),
@@ -59,6 +62,7 @@ impl PersonBundle {
     fn initial_people(first: &str, last: &str) -> Self {
         PersonBundle {
             person: Person,
+            alive: Alive,
             name: Name {
                 first: first.into(),
                 last: last.into(),
@@ -94,7 +98,7 @@ fn add_people(mut commands: Commands) {
             "Albert",
             "Morales-Allan",
             [jack, pau].into(),
-            [].into()
+            [].into(),
         ))
         .id();
 
@@ -103,7 +107,7 @@ fn add_people(mut commands: Commands) {
             "Pip",
             "Morales-Allan",
             [jack, pau].into(),
-            [].into()
+            [].into(),
         ))
         .id();
 
