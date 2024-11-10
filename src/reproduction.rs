@@ -29,7 +29,7 @@ impl Pregnancy {
 }
 
 #[derive(Event, Debug)]
-pub struct GiveBirthEvent {
+struct GiveBirthEvent {
     mother: Entity,
     father: Entity,
     progress: i32,
@@ -38,13 +38,13 @@ pub struct GiveBirthEvent {
 }
 
 #[derive(Event, Debug)]
-pub struct SuccessfulBirthEvent {
+struct SuccessfulBirthEvent {
     mother: Entity,
     father: Entity,
 }
 
 #[derive(Event, Debug)]
-pub struct UnsuccessfulBirthEvent {
+struct UnsuccessfulBirthEvent {
     mother: Entity,
     father: Entity,
 }
