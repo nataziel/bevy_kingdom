@@ -12,7 +12,7 @@ use bevy::{
 use calendar::DatePlugin;
 use moon::MoonPlugin;
 use people::HelloPlugin;
-use reproduction::{GiveBirthEvent, ReproductionPlugin};
+use reproduction::ReproductionPlugin;
 use season::SeasonPlugin;
 
 fn main() {
@@ -28,6 +28,5 @@ fn main() {
             filter: "".into(),
             custom_layer: |_| None,
         })
-        .add_event::<GiveBirthEvent>()
         .run();
 }

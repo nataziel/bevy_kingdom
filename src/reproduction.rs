@@ -1,4 +1,4 @@
-use crate::people::{Children, Name, Parents, Person, Siblings};
+use crate::people::{Children, Name, Person, PersonBundle, Siblings};
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
@@ -37,6 +37,18 @@ pub struct GiveBirthEvent {
     std_term: i32,
 }
 
+#[derive(Event, Debug)]
+pub struct SuccessfulBirthEvent {
+    mother: Entity,
+    father: Entity,
+}
+
+#[derive(Event, Debug)]
+pub struct UnsuccessfulBirthEvent {
+    mother: Entity,
+    father: Entity,
+}
+
 fn handle_pregnancy(
     mut ev_give_birth: EventWriter<GiveBirthEvent>,
     mut query: Query<(Entity, &Name, &mut Pregnancy), (With<Person>, With<ChildBearing>)>,
@@ -64,56 +76,15 @@ fn handle_pregnancy(
     }
 }
 
-fn handle_givebirth(
+fn handle_give_birth(
     mut commands: Commands,
     mut ev_give_birth: EventReader<GiveBirthEvent>,
-    mut query_parents: Query<(&mut Children, &Name)>,
-    mut query_siblings: Query<&mut Siblings>,
+    mut ev_successful_birth: EventWriter<SuccessfulBirthEvent>,
+    mut ev_unsuccessful_birth: EventWriter<UnsuccessfulBirthEvent>,
 ) {
     for event in ev_give_birth.read() {
         commands.entity(event.mother).remove::<Pregnancy>();
 
-        // create a vector of siblings for the new child
-        let mut new_child_siblings = HashSet::new();
-        // get the children of the mother
-        if let Ok((children_mother, _)) = query_parents.get(event.mother) {
-            for child in &children_mother.list {
-                new_child_siblings.insert(*child);
-            }
-        }
-        // get the children of the father
-        if let Ok((children_father, _)) = query_parents.get(event.father) {
-            for child in &children_father.list {
-                new_child_siblings.insert(*child);
-            }
-        }
-
-        // TODO: generalise this
-        let new_child = commands
-            .spawn((
-                Person,
-                Name {
-                    first: "Penny".to_string(),
-                    last: "Morales-Allan".to_string(),
-                },
-                Parents {
-                    list: HashSet::from([event.mother, event.father]),
-                },
-                Siblings {
-                    // gotta clone it cos we are gonna use it again after
-                    list: new_child_siblings.clone(),
-                },
-            ))
-            .id();
-
-        // TODO: maybe this should be a separate system/event
-        // insert the new child into the set of siblings for each of their siblings
-        let mut siblings_iter = query_siblings.iter_many_mut(&new_child_siblings);
-        while let Some(mut siblings_of_sibling) = siblings_iter.fetch_next() {
-            siblings_of_sibling.list.insert(new_child);
-        }
-
-        // TODO: cause problems if term_diff is big
         debug!("Term_Diff: {}", event.progress - event.mean_term);
         let problem_dist =
             // double the standard deviation just to make it less likely there are problems
@@ -129,18 +100,81 @@ fn handle_givebirth(
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
         if successful_birth {
-            // add the kid to the hashset of children for each parent
-            if let Ok((mut children_mother, name_mother)) = query_parents.get_mut(event.mother) {
-                info!("{} {} gave birth!", name_mother.first, name_mother.last);
-                children_mother.list.insert(new_child);
-            }
-            if let Ok((mut children_father, _name_father)) = query_parents.get_mut(event.father) {
-                children_father.list.insert(new_child);
-            }
+            ev_successful_birth.send(SuccessfulBirthEvent {
+                mother: event.mother,
+                father: event.father,
+            });
         } else {
-            // TODO: make some fucked up shit happen
-            // mum dies? baby dies? :(
+            ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
+                mother: event.mother,
+                father: event.father,
+            });
         }
+    }
+}
+
+fn handle_successful_birth(
+    mut commands: Commands,
+    mut ev_successful_birth: EventReader<SuccessfulBirthEvent>,
+    mut query_parents: Query<(&mut Children, &Name)>,
+    mut query_siblings: Query<&mut Siblings>,
+) {
+    for event in ev_successful_birth.read() {
+        // create a set of parents for the new child
+        let new_child_parents = HashSet::from([event.mother, event.father]);
+
+        // create a set of siblings for the new child
+        let mut new_child_siblings = HashSet::new();
+        // get the children of the mother
+        if let Ok((children_mother, _)) = query_parents.get(event.mother) {
+            for child in &children_mother.set {
+                new_child_siblings.insert(*child);
+            }
+        }
+        // get the children of the father
+        if let Ok((children_father, _)) = query_parents.get(event.father) {
+            for child in &children_father.set {
+                new_child_siblings.insert(*child);
+            }
+        }
+
+        // TODO: generalise this
+        let new_child = commands
+            .spawn(PersonBundle::new_child(
+                "Penny",
+                "Morales-Allan",
+                new_child_parents,
+                // gotta clone cos we're gonna use it again later
+                new_child_siblings.clone(),
+            ))
+            .id();
+
+        // add the kid to the hashset of children for each parent
+        if let Ok((mut children_mother, name_mother)) = query_parents.get_mut(event.mother) {
+            info!("{} {} gave birth!", name_mother.first, name_mother.last);
+            children_mother.set.insert(new_child);
+        }
+        if let Ok((mut children_father, _name_father)) = query_parents.get_mut(event.father) {
+            children_father.set.insert(new_child);
+        }
+        // insert the new child into the set of siblings for each of their siblings
+        let mut siblings_iter = query_siblings.iter_many_mut(&new_child_siblings);
+        while let Some(mut siblings_of_sibling) = siblings_iter.fetch_next() {
+            siblings_of_sibling.set.insert(new_child);
+        }
+    }
+}
+
+fn handle_unsuccessful_birth(
+    mut commands: Commands,
+    mut ev_unsuccessful_birth: EventReader<UnsuccessfulBirthEvent>,
+    mut query_parents: Query<(&mut Children, &Name)>,
+    mut query_siblings: Query<&mut Siblings>,
+) {
+    for event in ev_unsuccessful_birth.read() {
+        info!("Handling unsuccessful birth {:?}", event)
+        // TODO: make some fucked up shit happen
+        // mum dies? baby dies? :(
     }
 }
 
@@ -148,6 +182,16 @@ pub struct ReproductionPlugin;
 
 impl Plugin for ReproductionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (handle_pregnancy, handle_givebirth).chain());
+        app.add_systems(
+            Update,
+            (
+                (handle_pregnancy, handle_give_birth).chain(),
+                (handle_successful_birth, handle_unsuccessful_birth),
+            )
+                .chain(),
+        )
+        .add_event::<GiveBirthEvent>()
+        .add_event::<SuccessfulBirthEvent>()
+        .add_event::<UnsuccessfulBirthEvent>();
     }
 }
