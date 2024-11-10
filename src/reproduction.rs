@@ -13,15 +13,21 @@ pub const HUMAN_PREGNANCY_STD: i32 = 16;
 pub struct Pregnancy {
     mean_term: i32,
     std_term: i32,
+    term: i32,
     progress: i32,
     father: Entity,
 }
 
 impl Pregnancy {
     pub fn new(mean_term: i32, std_term: i32, father: Entity) -> Self {
+        let mut rng = thread_rng();
+        let norm_dist = Normal::new(mean_term.into(), std_term.into()).unwrap();
+        let term = norm_dist.sample(&mut rng) as i32;
+
         Pregnancy {
             mean_term,
             std_term,
+            term,
             progress: 0,
             father,
         }
@@ -47,6 +53,7 @@ struct SuccessfulBirthEvent {
 struct UnsuccessfulBirthEvent {
     mother: Entity,
     father: Entity,
+    term_diff: i32,
 }
 
 fn handle_pregnancy(
@@ -55,16 +62,12 @@ fn handle_pregnancy(
 ) {
     for (mother, name, mut pregnancy) in &mut query {
         pregnancy.progress += 1;
-        info!(
+        debug!(
             "{} {} is pregnant, {}/{}",
             name.first, name.last, pregnancy.progress, pregnancy.mean_term
         );
 
-        let mut rng = thread_rng();
-        let norm_dist = Normal::new(pregnancy.mean_term.into(), pregnancy.std_term.into()).unwrap();
-        let sampled_value = norm_dist.sample(&mut rng) as i32;
-
-        if pregnancy.progress >= sampled_value {
+        if pregnancy.progress >= pregnancy.term {
             ev_give_birth.send(GiveBirthEvent {
                 mother,
                 father: pregnancy.father,
@@ -83,9 +86,11 @@ fn handle_give_birth(
     mut ev_unsuccessful_birth: EventWriter<UnsuccessfulBirthEvent>,
 ) {
     for event in ev_give_birth.read() {
+        debug!("Handling give_birth for {}", event.mother);
         commands.entity(event.mother).remove::<Pregnancy>();
 
-        debug!("Term_Diff: {}", event.progress - event.mean_term);
+        let term_diff = event.progress - event.mean_term;
+        debug!("Term_Diff: {}", term_diff);
         let problem_dist =
             // double the standard deviation just to make it less likely there are problems
             Normal::new(event.mean_term.into(), (2 * event.std_term).into()).unwrap();
@@ -99,16 +104,20 @@ fn handle_give_birth(
         let successful_birth = bernoulli_dist.sample(&mut rng);
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
-        if successful_birth {
-            ev_successful_birth.send(SuccessfulBirthEvent {
-                mother: event.mother,
-                father: event.father,
-            });
-        } else {
-            ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
-                mother: event.mother,
-                father: event.father,
-            });
+        match successful_birth {
+            true => {
+                ev_successful_birth.send(SuccessfulBirthEvent {
+                    mother: event.mother,
+                    father: event.father,
+                });
+            }
+            false => {
+                ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
+                    mother: event.mother,
+                    father: event.father,
+                    term_diff,
+                });
+            }
         }
     }
 }
@@ -172,7 +181,8 @@ fn handle_unsuccessful_birth(
     mut query_siblings: Query<&mut Siblings>,
 ) {
     for event in ev_unsuccessful_birth.read() {
-        info!("Handling unsuccessful birth {:?}", event)
+        debug!("Handling unsuccessful birth {:?}", event);
+        debug!("Term Diff: {}", event.term_diff);
         // TODO: make some fucked up shit happen
         // mum dies? baby dies? :(
     }
