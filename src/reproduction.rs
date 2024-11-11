@@ -1,4 +1,5 @@
 use crate::life::DeathEvent;
+use crate::moon::Moon;
 use crate::people::{Children, Name, Person, PersonBundle, Siblings};
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
@@ -128,6 +129,7 @@ fn handle_successful_birth(
     mut ev_successful_birth: EventReader<SuccessfulBirthEvent>,
     mut query_parents: Query<(&mut Children, &Name)>,
     mut query_siblings: Query<&mut Siblings>,
+    query_moon: Query<&Moon>,
 ) {
     for event in ev_successful_birth.read() {
         // create a set of parents for the new child
@@ -148,6 +150,8 @@ fn handle_successful_birth(
             }
         }
 
+        let moon = query_moon.single();
+
         // TODO: generalise this
         let new_child = commands
             .spawn(PersonBundle::new_child(
@@ -156,6 +160,7 @@ fn handle_successful_birth(
                 new_child_parents,
                 // gotta clone cos we're gonna use it again later
                 new_child_siblings.clone(),
+                moon.house.clone(),
             ))
             .id();
 
