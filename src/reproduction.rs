@@ -1,6 +1,6 @@
 use crate::life::DeathEvent;
 use crate::moon::Moon;
-use crate::people::{Children, Name, Person, PersonBundle, Siblings};
+use crate::people::{Children, Name, Person, PersonBundle, Siblings, AssignedMoonHouse};
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
@@ -86,6 +86,8 @@ fn handle_give_birth(
     mut ev_give_birth: EventReader<GiveBirthEvent>,
     mut ev_successful_birth: EventWriter<SuccessfulBirthEvent>,
     mut ev_unsuccessful_birth: EventWriter<UnsuccessfulBirthEvent>,
+    query_moon: Query<&Moon>,
+    query_assigned_house: Query<&AssignedMoonHouse>,
 ) {
     for event in ev_give_birth.read() {
         debug!("Handling give_birth for {}", event.mother);
@@ -100,9 +102,19 @@ fn handle_give_birth(
         debug!("pdf_at_sample: {}", pdf_at_sample);
         let pdf_at_mean = problem_dist.pdf(event.mean_term.into());
         debug!("pdf_at_mean: {}", pdf_at_mean);
+        let mut raw_p = pdf_at_sample / pdf_at_mean;
+
+
+        let mother_house = query_assigned_house.get(event.mother).unwrap().house.clone();
+        let current_moon_house = query_moon.single().house.clone();
+        if mother_house == current_moon_house {
+            debug!("Mother giving birth in favoured house {}", mother_house);
+            // 10% more likely to successfully give birth
+            raw_p += 0.10
+        }
 
         let mut rng = thread_rng();
-        let bernoulli_dist = Bernoulli::new(pdf_at_sample / pdf_at_mean).unwrap();
+        let bernoulli_dist = Bernoulli::new(raw_p).unwrap();
         let successful_birth = bernoulli_dist.sample(&mut rng);
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
@@ -194,7 +206,7 @@ fn handle_unsuccessful_birth(
             // make the dad get sad?
         } else {
             debug!("Term dif too low");
-            // make both mum and dad bet sad
+            // make both mum and dad be sad
         }
     }
 }

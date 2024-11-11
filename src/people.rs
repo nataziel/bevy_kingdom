@@ -29,8 +29,8 @@ pub struct Siblings {
 }
 
 #[derive(Component, Debug)]
-struct AssignedMoonHouse {
-    house: MoonHouse,
+pub struct AssignedMoonHouse {
+    pub house: MoonHouse,
 }
 
 #[derive(Bundle)]
