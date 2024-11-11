@@ -202,7 +202,7 @@ fn handle_unsuccessful_birth(
         debug!("Handling unsuccessful birth {:?}", event);
         debug!("Term Diff: {}", event.term_diff);
         if event.term_diff >= 0 {
-            ev_death.send(DeathEvent::new(event.mother));
+            ev_death.send(DeathEvent::new(event.mother, "Died during childbirth"));
             // make the dad get sad?
         } else {
             debug!("Term dif too low");
