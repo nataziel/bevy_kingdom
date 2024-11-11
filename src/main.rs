@@ -1,3 +1,4 @@
+mod age;
 mod calendar;
 mod life;
 mod moon;
@@ -6,6 +7,7 @@ mod reproduction;
 mod season;
 mod weather;
 
+use age::AgePlugin;
 use bevy::{
     log::{Level, LogPlugin},
     prelude::*,
@@ -21,6 +23,7 @@ fn main() {
     App::new()
         .add_plugins(MinimalPlugins)
         .add_plugins(HelloPlugin)
+        .add_plugins(AgePlugin)
         .add_plugins(ReproductionPlugin)
         .add_plugins(LifePlugin)
         .add_plugins(DatePlugin)

@@ -176,6 +176,7 @@ fn handle_successful_birth(
                 // gotta clone cos we're gonna use it again later
                 new_child_siblings.clone(),
                 moon.house.clone(),
+                0,
             ))
             .id();
 

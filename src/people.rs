@@ -1,5 +1,6 @@
 use bevy::{prelude::*, utils::HashSet};
 
+use crate::age::Age;
 use crate::life::Alive;
 use crate::moon::MoonHouse;
 use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD};
@@ -42,6 +43,7 @@ pub struct PersonBundle {
     children: Children,
     siblings: Siblings,
     moon_house: AssignedMoonHouse,
+    age: Age,
 }
 
 impl PersonBundle {
@@ -51,6 +53,7 @@ impl PersonBundle {
         parents: HashSet<Entity>,
         siblings: HashSet<Entity>,
         house: MoonHouse,
+        age: i32,
     ) -> Self {
         PersonBundle {
             person: Person,
@@ -65,10 +68,11 @@ impl PersonBundle {
             },
             siblings: Siblings { set: siblings },
             moon_house: AssignedMoonHouse { house },
+            age: Age::new(age),
         }
     }
 
-    fn initial_people(first: &str, last: &str, house: MoonHouse) -> Self {
+    fn initial_people(first: &str, last: &str, house: MoonHouse, age: i32) -> Self {
         PersonBundle {
             person: Person,
             alive: Alive,
@@ -86,6 +90,7 @@ impl PersonBundle {
                 set: HashSet::new(),
             },
             moon_house: AssignedMoonHouse { house },
+            age: Age::new(age),
         }
     }
 }
@@ -96,12 +101,13 @@ fn add_people(mut commands: Commands) {
             "Jack",
             "Allan",
             MoonHouse::Death,
+            12000,
         ))
         .id();
 
     let pau = commands
         .spawn((
-            PersonBundle::initial_people("Paulina", "Morales", MoonHouse::Storm),
+            PersonBundle::initial_people("Paulina", "Morales", MoonHouse::Storm, 10555),
             ChildBearing,
             Pregnancy::new(HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, jack),
         ))
@@ -114,6 +120,7 @@ fn add_people(mut commands: Commands) {
             [jack, pau].into(),
             [].into(),
             MoonHouse::Light,
+            293,
         ))
         .id();
 
@@ -124,6 +131,7 @@ fn add_people(mut commands: Commands) {
             [jack, pau].into(),
             [].into(),
             MoonHouse::Wild,
+            854,
         ))
         .id();
 
@@ -146,6 +154,7 @@ fn add_people(mut commands: Commands) {
             "Jacob",
             "Wilmot",
             MoonHouse::Wind,
+            10800,
         ))
         .id();
 
@@ -156,6 +165,7 @@ fn add_people(mut commands: Commands) {
             [jacob].into(),
             [].into(),
             MoonHouse::Fire,
+            7000,
         ))
         .id();
 
@@ -165,30 +175,40 @@ fn add_people(mut commands: Commands) {
 }
 
 fn greet_people(
-    query_people: Query<(&Name, &Children, &Parents, &Siblings, &AssignedMoonHouse), With<Person>>,
+    query_people: Query<
+        (
+            &Name,
+            &Age,
+            &Children,
+            &Parents,
+            &Siblings,
+            &AssignedMoonHouse,
+        ),
+        With<Person>,
+    >,
 ) {
-    for (name, children, parents, siblings, assigned_house) in &query_people {
-        debug!("Hello {} {}!", name.first, name.last);
+    for (name, age, children, parents, siblings, assigned_house) in &query_people {
+        debug!("Hello {} {}({})!", name.first, name.last, age);
         debug!(
             "{} {} is favoured by High House {}",
             name.first, name.last, assigned_house.house
         );
 
-        for (child_name, _, _, _, _) in query_people.iter_many(&children.set) {
+        for (child_name, _, _, _, _, _) in query_people.iter_many(&children.set) {
             debug!(
                 "{} {} has a child called {} {}",
                 name.first, name.last, child_name.first, child_name.last,
             )
         }
 
-        for (parent_name, _, _, _, _) in query_people.iter_many(&parents.set) {
+        for (parent_name, _, _, _, _, _) in query_people.iter_many(&parents.set) {
             debug!(
                 "{} {} has a parent called {} {}",
                 name.first, name.last, parent_name.first, parent_name.last,
             )
         }
 
-        for (sibling_name, _, _, _, _) in query_people.iter_many(&siblings.set) {
+        for (sibling_name, _, _, _, _, _) in query_people.iter_many(&siblings.set) {
             debug!(
                 "{} {} has a sibling: {} {}",
                 name.first, name.last, sibling_name.first, sibling_name.last
@@ -211,13 +231,6 @@ pub struct HelloPlugin;
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, add_people);
-        app.add_systems(
-            Update,
-            ((
-                update_people,
-                greet_people,
-            )
-                .chain(),),
-        );
+        app.add_systems(Update, ((update_people, greet_people).chain(),));
     }
 }
