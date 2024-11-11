@@ -1,6 +1,6 @@
-use crate::life::DeathEvent;
+use crate::life::{CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
-use crate::people::{Children, Name, Person, PersonBundle, Siblings, AssignedMoonHouse};
+use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
@@ -104,8 +104,11 @@ fn handle_give_birth(
         debug!("pdf_at_mean: {}", pdf_at_mean);
         let mut raw_p = pdf_at_sample / pdf_at_mean;
 
-
-        let mother_house = query_assigned_house.get(event.mother).unwrap().house.clone();
+        let mother_house = query_assigned_house
+            .get(event.mother)
+            .unwrap()
+            .house
+            .clone();
         let current_moon_house = query_moon.single().house.clone();
         if mother_house == current_moon_house {
             debug!("Mother giving birth in favoured house {}", mother_house);
@@ -195,18 +198,47 @@ fn handle_successful_birth(
 fn handle_unsuccessful_birth(
     mut ev_unsuccessful_birth: EventReader<UnsuccessfulBirthEvent>,
     mut ev_death: EventWriter<DeathEvent>,
+    mut ev_cheated_death: EventWriter<CheatDeathEvent>,
+    query_moon: Query<&Moon>,
+    query_mother: Query<(&Name, &AssignedMoonHouse)>,
 ) {
     // TODO: make some fucked up shit happen
     // mum dies? baby dies? :(
+    let current_moon_house = &query_moon.single().house;
+
     for event in ev_unsuccessful_birth.read() {
-        debug!("Handling unsuccessful birth {:?}", event);
+        let (name, mother_assigned_house) = query_mother.get(event.mother).unwrap();
+        debug!(
+            "Handling unsuccessful birth for {} {}",
+            name.first, name.last
+        );
+
+        // is the mother currently in her favoured house?
+        let in_favoured = *current_moon_house == mother_assigned_house.house;
+
         debug!("Term Diff: {}", event.term_diff);
         if event.term_diff >= 0 {
-            ev_death.send(DeathEvent::new(event.mother, "Died during childbirth"));
-            // make the dad get sad?
+            if in_favoured {
+                let mut rng = thread_rng();
+                let bernoulli_dist = Bernoulli::new(0.1).unwrap();
+                let cheated_death = bernoulli_dist.sample(&mut rng);
+                debug!("Outcome of cheat death bernoulli trial {}", cheated_death);
+                if cheated_death {
+                    ev_cheated_death.send(CheatDeathEvent::new(
+                        event.mother,
+                        mother_assigned_house.house.clone(),
+                    ));
+                    return;
+                }
+            }
+
+            ev_death.send(DeathEvent::new(event.mother, "Childbirth"));
+            // TODO: make the dad get sad?
+            // TODO: but also maybe you scorn your house for letting your baby die?
+            // TODO: or maybe you're grateful your house intervened to let you live
         } else {
             debug!("Term dif too low");
-            // make both mum and dad be sad
+            // TODO: make both mum and dad be sad
         }
     }
 }
