@@ -113,7 +113,11 @@ fn handle_give_birth(
         if mother_house == current_moon_house {
             debug!("Mother giving birth in favoured house {}", mother_house);
             // 10% more likely to successfully give birth
-            raw_p += 0.10
+            raw_p += 0.10;
+            if raw_p > 1.0 {
+                // gotta round it down to 1 to prevent a panic when creating the distribution
+                raw_p = 1.0
+            }
         }
 
         let mut rng = thread_rng();
