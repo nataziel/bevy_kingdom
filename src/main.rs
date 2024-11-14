@@ -1,3 +1,4 @@
+#![warn(clippy::all, clippy::pedantic)]
 mod age;
 mod calendar;
 mod life;
