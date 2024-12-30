@@ -126,20 +126,17 @@ fn handle_give_birth(
         let successful_birth = bernoulli_dist.sample(&mut rng);
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
-        match successful_birth {
-            true => {
-                ev_successful_birth.send(SuccessfulBirthEvent {
-                    mother: event.mother,
-                    father: event.father,
-                });
-            }
-            false => {
-                ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
-                    mother: event.mother,
-                    father: event.father,
-                    term_diff,
-                });
-            }
+        if successful_birth {
+            ev_successful_birth.send(SuccessfulBirthEvent {
+                mother: event.mother,
+                father: event.father,
+            });
+        } else {
+            ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
+                mother: event.mother,
+                father: event.father,
+                term_diff,
+            });
         }
     }
 }

@@ -1,4 +1,7 @@
-use crate::{calendar::{Calendar, MonthName}, state::RunState};
+use crate::{
+    calendar::{Calendar, MonthName},
+    state::RunState,
+};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
@@ -21,22 +24,16 @@ impl Season {
     }
 
     pub fn month_to_season(month: MonthName) -> Self {
-        use crate::calendar::MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
+        use crate::calendar::MonthName::{
+            Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
+            SansCulottides, Termidor, Vendemiaire, Ventose,
+        };
         use Season::{Autumn, Spring, Summer, Winter};
         match month {
-            Messidor => Summer,
-            Termidor => Summer,
-            Fructidor => Summer,
-            Vendemiaire => Autumn,
-            Brumaire => Autumn,
-            Frimaire => Autumn,
-            Nivose => Winter,
-            Pluviose => Winter,
-            Ventose => Winter,
-            Germinal => Spring,
-            Floreal => Spring,
-            Prairial => Spring,
-            SansCulottides => Spring,
+            Messidor | Termidor | Fructidor => Summer,
+            Vendemiaire | Brumaire | Frimaire => Autumn,
+            Nivose | Pluviose | Ventose => Winter,
+            Germinal | Floreal | Prairial | SansCulottides => Spring,
         }
     }
 }
