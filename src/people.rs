@@ -199,21 +199,21 @@ fn greet_people(
             debug!(
                 "{} {} has a child called {} {}",
                 name.first, name.last, child_name.first, child_name.last,
-            )
+            );
         }
 
         for (parent_name, _, _, _, _, _) in query_people.iter_many(&parents.set) {
             debug!(
                 "{} {} has a parent called {} {}",
                 name.first, name.last, parent_name.first, parent_name.last,
-            )
+            );
         }
 
         for (sibling_name, _, _, _, _, _) in query_people.iter_many(&siblings.set) {
             debug!(
                 "{} {} has a sibling: {} {}",
                 name.first, name.last, sibling_name.first, sibling_name.last
-            )
+            );
         }
     }
 }

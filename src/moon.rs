@@ -49,7 +49,7 @@ pub enum MoonPhase {
 
 impl MoonPhase {
     pub fn next(&self) -> Self {
-        use MoonPhase::*;
+        use MoonPhase::{FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent, WaxingGibbous};
         match *self {
             New => WaxingCrescent,
             WaxingCrescent => FirstQuarter,
@@ -63,7 +63,7 @@ impl MoonPhase {
     }
 
     pub fn str(&self) -> String {
-        use MoonPhase::*;
+        use MoonPhase::{FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent, WaxingGibbous};
         match *self {
             New => "New".into(),
             WaxingCrescent => "Waxing Crescent".into(),
@@ -99,7 +99,7 @@ pub enum MoonHouse {
 
 impl MoonHouse {
     pub fn str(&self) -> String {
-        use MoonHouse::*;
+        use MoonHouse::{Dark, Death, Dream, Earth, Fire, Light, Storm, Water, Wild, Wind};
         match *self {
             Dark => "Dark".into(),
             Light => "Light".into(),
@@ -128,17 +128,17 @@ fn handle_house(moon: &mut Moon) {
 
     // Bonus to transition if it's a New Moon
     if moon.phase == MoonPhase::New {
-        transition_value += 5
+        transition_value += 5;
     }
 
     if transition_value >= moon.transition_threshold {
         if (transition_value - 5 < moon.transition_threshold) & (moon.phase == MoonPhase::New) {
-            info!("House transitioned early due to the New Moon!")
+            info!("House transitioned early due to the New Moon!");
         }
         moon.transition_range = TRANSITION_RANGE_START;
         moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
 
-        info!("Moon transitioned to House {}", moon.house)
+        info!("Moon transitioned to House {}", moon.house);
     } else {
         moon.transition_range += 1;
     };
@@ -160,11 +160,11 @@ fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u
         if *house == new_house {
             *weight = 1;
         } else {
-            *weight += 1
+            *weight += 1;
         };
     }
 
-    return new_house;
+    new_house
 }
 
 pub struct MoonPlugin;
@@ -178,7 +178,7 @@ impl Plugin for MoonPlugin {
 
 fn add_moon(mut commands: Commands) {
     // Construct weights map here because can't do it as a const
-    use MoonHouse::*;
+    use MoonHouse::{Dark, Death, Dream, Earth, Fire, Light, Storm, Water, Wild, Wind};
     let mut house_weights_map: HashMap<MoonHouse, u32> = HashMap::new();
     house_weights_map.insert(Dark, 1);
     house_weights_map.insert(Light, 1);

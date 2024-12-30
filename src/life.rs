@@ -51,7 +51,7 @@ fn handle_death(
         info!(
             "{} {} died. Cause of death: {}",
             name.first, name.last, event.cause
-        )
+        );
 
         // TODO: make the parents/siblings/children sad
     }

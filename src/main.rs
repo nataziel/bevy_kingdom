@@ -40,7 +40,7 @@ fn main() {
         .add_plugins(PausePlugin) // adds RunState and toggle based on frame count
         .add_plugins(LogPlugin {
             level: Level::DEBUG,
-            filter: "".into(),
+            filter: String::new(),
             custom_layer: |_| None,
         })
         .run();

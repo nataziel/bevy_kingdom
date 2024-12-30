@@ -117,7 +117,7 @@ fn handle_give_birth(
             raw_p += 0.10;
             if raw_p > 1.0 {
                 // gotta round it down to 1 to prevent a panic when creating the distribution
-                raw_p = 1.0
+                raw_p = 1.0;
             }
         }
 

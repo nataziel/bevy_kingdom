@@ -1,14 +1,8 @@
 use bevy::prelude::*;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct FrameCount {
     pub count: u32,
-}
-
-impl Default for FrameCount {
-    fn default() -> Self {
-        FrameCount { count: 0 }
-    }
 }
 
 fn handle_framecount(mut framecount: ResMut<FrameCount>) {

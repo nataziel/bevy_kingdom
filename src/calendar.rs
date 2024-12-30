@@ -26,7 +26,7 @@ pub enum MonthName {
 
 impl fmt::Display for MonthName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use MonthName::*;
+        use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
         let out_string: String = match *self {
             Messidor => "Messidor".into(),
             Termidor => "Termidor".into(),
@@ -42,13 +42,13 @@ impl fmt::Display for MonthName {
             Prairial => "Prairial".into(),
             SansCulottides => "Sans Culottides".into(),
         };
-        write!(f, "{}", out_string)
+        write!(f, "{out_string}")
     }
 }
 
 impl MonthName {
     pub fn next(&self) -> Self {
-        use MonthName::*;
+        use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
         match *self {
             Messidor => Termidor,
             Termidor => Fructidor,
@@ -119,7 +119,7 @@ impl Plugin for DatePlugin {
 }
 
 fn add_calendar(mut commands: Commands) {
-    use MonthName::*;
+    use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
     let mut month_map: HashMap<MonthName, u32> = HashMap::new();
     month_map.insert(Messidor, 30);
     month_map.insert(Termidor, 30);
@@ -149,7 +149,7 @@ fn advance_date(mut query: Query<&mut Calendar>) {
     handle_years(&mut calendar);
 
     debug!("{:?}", calendar); // can probably remove this at some point
-    info!("{}", *calendar)
+    info!("{}", *calendar);
 }
 
 fn handle_months(calendar: &mut Mut<'_, Calendar>) {
@@ -162,7 +162,7 @@ fn handle_months(calendar: &mut Mut<'_, Calendar>) {
         info!(
             "Month {} ended, transitioned to next month {}",
             current_month, calendar.month
-        )
+        );
     }
 }
 
@@ -177,6 +177,6 @@ fn handle_years(calendar: &mut Mut<'_, Calendar>) {
             "Year {} ended, transitioned to Year {}",
             calendar.year - 1,
             calendar.year
-        )
+        );
     }
 }

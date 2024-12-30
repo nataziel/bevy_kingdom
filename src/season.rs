@@ -1,4 +1,4 @@
-use crate::{calendar::*, state::RunState};
+use crate::{calendar::{Calendar, MonthName}, state::RunState};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
@@ -11,7 +11,7 @@ enum Season {
 
 impl Season {
     pub fn next(&self) -> Self {
-        use Season::*;
+        use Season::{Autumn, Spring, Summer, Winter};
         match *self {
             Summer => Autumn,
             Autumn => Winter,
@@ -21,8 +21,8 @@ impl Season {
     }
 
     pub fn month_to_season(month: MonthName) -> Self {
-        use crate::calendar::MonthName::*;
-        use Season::*;
+        use crate::calendar::MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
+        use Season::{Autumn, Spring, Summer, Winter};
         match month {
             Messidor => Summer,
             Termidor => Summer,
@@ -60,5 +60,5 @@ fn handle_season(mut season_query: Query<&mut Season>, calendar_query: Query<&Ca
 
     *season = Season::month_to_season(calendar.month);
 
-    debug!("{:?}", *season)
+    debug!("{:?}", *season);
 }
