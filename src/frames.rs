@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 #[derive(Resource)]
-struct FrameCount {
-    count: u32,
+pub struct FrameCount {
+    pub count: u32,
 }
 
 impl Default for FrameCount {

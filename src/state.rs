@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::FrameCount;
+use crate::frames::FrameCount;
 
 #[derive(Default, States, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum RunState {

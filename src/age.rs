@@ -23,7 +23,7 @@ impl std::fmt::Display for Age {
 
 fn handle_age(mut query: Query<&mut Age, With<Alive>>) {
     for mut age in &mut query {
-        age.days += 1
+        age.days += 1;
     }
 }
 
