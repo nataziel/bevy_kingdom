@@ -4,6 +4,7 @@ use crate::age::Age;
 use crate::life::Alive;
 use crate::moon::MoonHouse;
 use crate::reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD};
+use crate::state::RunState;
 
 #[derive(Component, Debug)]
 pub struct Person;
@@ -231,6 +232,6 @@ pub struct HelloPlugin;
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, add_people);
-        app.add_systems(Update, ((update_people, greet_people).chain(),));
+        app.add_systems(Update, ((update_people, greet_people).chain(),).run_if(in_state(RunState::Running)));
     }
 }

@@ -1,4 +1,4 @@
-use crate::{moon::MoonHouse, people::Name};
+use crate::{moon::MoonHouse, people::Name, state::RunState};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
@@ -76,8 +76,11 @@ pub struct LifePlugin;
 
 impl Plugin for LifePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (handle_death, handle_cheat_death))
-            .add_event::<DeathEvent>()
-            .add_event::<CheatDeathEvent>();
+        app.add_systems(
+            Update,
+            (handle_death, handle_cheat_death).run_if(in_state(RunState::Running)),
+        )
+        .add_event::<DeathEvent>()
+        .add_event::<CheatDeathEvent>();
     }
 }

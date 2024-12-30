@@ -3,6 +3,8 @@ use std::fmt;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 
+use crate::state::RunState;
+
 const YEAR_LENGTH: u32 = 365;
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
@@ -112,7 +114,7 @@ pub struct DatePlugin;
 impl Plugin for DatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, add_calendar);
-        app.add_systems(Update, advance_date);
+        app.add_systems(Update, advance_date.run_if(in_state(RunState::Running)));
     }
 }
 
@@ -146,7 +148,7 @@ fn advance_date(mut query: Query<&mut Calendar>) {
 
     handle_years(&mut calendar);
 
-    debug!("{:?}", calendar);
+    debug!("{:?}", calendar); // can probably remove this at some point
     info!("{}", *calendar)
 }
 

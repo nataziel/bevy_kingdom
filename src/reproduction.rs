@@ -1,6 +1,7 @@
 use crate::life::{CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
 use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
+use crate::state::RunState;
 use bevy::{prelude::*, utils::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
@@ -258,7 +259,8 @@ impl Plugin for ReproductionPlugin {
                 (handle_pregnancy, handle_give_birth).chain(),
                 (handle_successful_birth, handle_unsuccessful_birth),
             )
-                .chain(),
+                .chain()
+                .run_if(in_state(RunState::Running)),
         )
         .add_event::<GiveBirthEvent>()
         .add_event::<SuccessfulBirthEvent>()

@@ -3,6 +3,8 @@ use bevy::utils::HashMap;
 use rand::prelude::*;
 use std::fmt;
 
+use crate::state::RunState;
+
 const TRANSITION_RANGE_START: u32 = 15;
 const TRANSITION_THRESHOLD: u32 = 30;
 
@@ -170,7 +172,7 @@ pub struct MoonPlugin;
 impl Plugin for MoonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, add_moon);
-        app.add_systems(Update, handle_moon);
+        app.add_systems(Update, handle_moon.run_if(in_state(RunState::Running)));
     }
 }
 

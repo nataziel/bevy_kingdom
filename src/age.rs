@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::life::Alive;
+use crate::{life::Alive, state::RunState};
 
 #[derive(Component, Debug)]
 pub struct Age {
@@ -31,6 +31,6 @@ pub struct AgePlugin;
 
 impl Plugin for AgePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, handle_age);
+        app.add_systems(Update, handle_age.run_if(in_state(RunState::Running)));
     }
 }
