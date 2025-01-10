@@ -49,7 +49,10 @@ pub enum MoonPhase {
 
 impl MoonPhase {
     pub fn next(&self) -> Self {
-        use MoonPhase::{FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent, WaxingGibbous};
+        use MoonPhase::{
+            FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent,
+            WaxingGibbous,
+        };
         match *self {
             New => WaxingCrescent,
             WaxingCrescent => FirstQuarter,
@@ -63,7 +66,10 @@ impl MoonPhase {
     }
 
     pub fn str(&self) -> String {
-        use MoonPhase::{FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent, WaxingGibbous};
+        use MoonPhase::{
+            FirstQuarter, Full, LastQuarter, New, WaningCrescent, WaningGibbous, WaxingCrescent,
+            WaxingGibbous,
+        };
         match *self {
             New => "New".into(),
             WaxingCrescent => "Waxing Crescent".into(),

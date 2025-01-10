@@ -26,7 +26,10 @@ pub enum MonthName {
 
 impl fmt::Display for MonthName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
+        use MonthName::{
+            Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
+            SansCulottides, Termidor, Vendemiaire, Ventose,
+        };
         let out_string: String = match *self {
             Messidor => "Messidor".into(),
             Termidor => "Termidor".into(),
@@ -48,7 +51,10 @@ impl fmt::Display for MonthName {
 
 impl MonthName {
     pub fn next(&self) -> Self {
-        use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
+        use MonthName::{
+            Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
+            SansCulottides, Termidor, Vendemiaire, Ventose,
+        };
         match *self {
             Messidor => Termidor,
             Termidor => Fructidor,
@@ -119,7 +125,10 @@ impl Plugin for DatePlugin {
 }
 
 fn add_calendar(mut commands: Commands) {
-    use MonthName::{Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial, SansCulottides, Termidor, Vendemiaire, Ventose};
+    use MonthName::{
+        Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
+        SansCulottides, Termidor, Vendemiaire, Ventose,
+    };
     let mut month_map: HashMap<MonthName, u32> = HashMap::new();
     month_map.insert(Messidor, 30);
     month_map.insert(Termidor, 30);
