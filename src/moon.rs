@@ -119,6 +119,23 @@ impl MoonHouse {
             Wild => "Wild".into(),
         }
     }
+
+    pub fn random(rng: &mut ThreadRng) -> MoonHouse {
+        use MoonHouse::{Dark, Death, Dream, Earth, Fire, Light, Storm, Water, Wild, Wind};
+
+        match rng.gen_range(0..10) {
+            0 => Dark,
+            1 => Death,
+            2 => Dream,
+            3 => Earth,
+            4 => Fire,
+            5 => Light,
+            6 => Storm,
+            7 => Water,
+            8 => Wild,
+            _ => Wind,
+        }
+    }
 }
 
 impl fmt::Display for MoonHouse {

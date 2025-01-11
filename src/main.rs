@@ -7,6 +7,7 @@ mod moon;
 mod people;
 mod reproduction;
 mod season;
+mod setup;
 mod state;
 mod weather;
 
@@ -23,6 +24,7 @@ use moon::MoonPlugin;
 use people::HelloPlugin;
 use reproduction::ReproductionPlugin;
 use season::SeasonPlugin;
+use setup::SetupPlugin;
 use state::PausePlugin;
 
 fn main() {
@@ -30,6 +32,7 @@ fn main() {
         .add_plugins(MinimalPlugins)
         .add_plugins(StatesPlugin) // needed to use states
         .add_plugins(FramePlugin) // add framecount resource
+        .add_plugins(SetupPlugin)
         .add_plugins(HelloPlugin)
         .add_plugins(AgePlugin)
         .add_plugins(ReproductionPlugin)
