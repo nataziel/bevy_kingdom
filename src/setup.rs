@@ -53,7 +53,7 @@ fn create_initial_people(mut commands: Commands) {
             .spawn(PersonBundle::initial_people(
                 family_male_first_names.pop().unwrap(),
                 family_name,
-                MoonHouse::random(&mut rng),
+                rand::random::<MoonHouse>(),
                 rng.gen_range(5844..14610),
             ))
             .id();
@@ -63,7 +63,7 @@ fn create_initial_people(mut commands: Commands) {
                 PersonBundle::initial_people(
                     family_female_first_names.pop().unwrap(),
                     last_names.pop().unwrap(),
-                    MoonHouse::random(&mut rng),
+                    rand::random::<MoonHouse>(),
                     rng.gen_range(5844..14610),
                 ),
                 ChildBearing,
@@ -80,7 +80,7 @@ fn create_initial_people(mut commands: Commands) {
                         family_name,
                         [father, mother].into(),
                         [].into(),
-                        MoonHouse::random(&mut rng),
+                        rand::random::<MoonHouse>(),
                         0,
                     ))
                     .id()
@@ -92,7 +92,7 @@ fn create_initial_people(mut commands: Commands) {
                             family_name,
                             [father, mother].into(),
                             [].into(),
-                            MoonHouse::random(&mut rng),
+                            rand::random::<MoonHouse>(),
                             0,
                         ),
                         ChildBearing,

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use rand::distributions::Standard;
 use rand::prelude::*;
 use std::fmt;
 
@@ -119,10 +120,11 @@ impl MoonHouse {
             Wild => "Wild".into(),
         }
     }
+}
 
-    pub fn random(rng: &mut ThreadRng) -> MoonHouse {
+impl Distribution<MoonHouse> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> MoonHouse {
         use MoonHouse::{Dark, Death, Dream, Earth, Fire, Light, Storm, Water, Wild, Wind};
-
         match rng.gen_range(0..10) {
             0 => Dark,
             1 => Death,
