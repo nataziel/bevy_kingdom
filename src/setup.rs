@@ -2,6 +2,7 @@ use crate::{
     moon::MoonHouse,
     people::{Children, PersonBundle, Siblings},
     reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD},
+    royalty::{Royalty, Title},
 };
 use bevy::{prelude::*, utils::HashSet};
 use rand::prelude::*;
@@ -73,6 +74,7 @@ fn create_initial_people(mut commands: Commands) {
         // create a random number of children for the couple
         let mut children = HashSet::new();
         let mut child_age = rng.gen_range(0..365);
+
         for _ in 1..rng.gen_range(0..8) {
             let child = if rand::random() {
                 commands
@@ -126,11 +128,9 @@ fn create_initial_people(mut commands: Commands) {
 
 fn add_custom_people(mut commands: Commands) {
     let jack = commands
-        .spawn(PersonBundle::initial_people(
-            "Jack",
-            "Allan",
-            MoonHouse::Death,
-            12000,
+        .spawn((
+            PersonBundle::initial_people("Jack", "Allan", MoonHouse::Death, 12000),
+            Royalty { title: Title::King },
         ))
         .id();
 
@@ -139,17 +139,25 @@ fn add_custom_people(mut commands: Commands) {
             PersonBundle::initial_people("Paulina", "Morales-Allan", MoonHouse::Storm, 10555),
             ChildBearing,
             Pregnancy::new(HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, jack),
+            Royalty {
+                title: Title::Queen,
+            },
         ))
         .id();
 
     let albie = commands
-        .spawn(PersonBundle::new_child(
-            "Albert",
-            "Morales-Allan",
-            [jack, pau].into(),
-            [].into(),
-            MoonHouse::Light,
-            293,
+        .spawn((
+            PersonBundle::new_child(
+                "Albert",
+                "Morales-Allan",
+                [jack, pau].into(),
+                [].into(),
+                MoonHouse::Light,
+                293,
+            ),
+            Royalty {
+                title: Title::Prince,
+            },
         ))
         .id();
 

@@ -10,6 +10,7 @@ mod season;
 mod setup;
 mod state;
 mod weather;
+mod royalty;
 
 use age::AgePlugin;
 use bevy::{
@@ -26,6 +27,7 @@ use reproduction::ReproductionPlugin;
 use season::SeasonPlugin;
 use setup::SetupPlugin;
 use state::PausePlugin;
+use royalty::RoyaltyPlugin;
 
 fn main() {
     App::new()
@@ -40,6 +42,7 @@ fn main() {
         .add_plugins(DatePlugin)
         .add_plugins(MoonPlugin)
         .add_plugins(SeasonPlugin)
+        .add_plugins(RoyaltyPlugin)
         .add_plugins(PausePlugin) // adds RunState and toggle based on frame count
         .add_plugins(LogPlugin {
             level: Level::DEBUG,
