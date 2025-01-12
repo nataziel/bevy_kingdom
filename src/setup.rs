@@ -72,6 +72,7 @@ fn create_initial_people(mut commands: Commands) {
 
         // create a random number of children for the couple
         let mut children = HashSet::new();
+        let mut child_age = rng.gen_range(0..365);
         for _ in 1..rng.gen_range(0..8) {
             let child = if rand::random() {
                 commands
@@ -81,7 +82,7 @@ fn create_initial_people(mut commands: Commands) {
                         [father, mother].into(),
                         [].into(),
                         rand::random::<MoonHouse>(),
-                        0,
+                        child_age,
                     ))
                     .id()
             } else {
@@ -93,7 +94,7 @@ fn create_initial_people(mut commands: Commands) {
                             [father, mother].into(),
                             [].into(),
                             rand::random::<MoonHouse>(),
-                            0,
+                            child_age,
                         ),
                         ChildBearing,
                     ))
@@ -101,6 +102,7 @@ fn create_initial_people(mut commands: Commands) {
             };
             // add the child to the HashSet so we can handle them later
             children.insert(child);
+            child_age += rng.gen_range(365..1460);
         }
 
         // add the children to the parents
