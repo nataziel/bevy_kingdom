@@ -1,9 +1,12 @@
+use bevy::ecs::system::SystemId;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use rand::distributions::Standard;
 use rand::prelude::*;
 use std::fmt;
 
+use crate::life::Alive;
+use crate::people::{AssignedMoonHouse, Name};
 use crate::state::RunState;
 
 const TRANSITION_RANGE_START: u32 = 15;
@@ -146,7 +149,7 @@ impl fmt::Display for MoonHouse {
     }
 }
 
-fn handle_house(moon: &mut Moon) {
+fn handle_house(moon: &mut Moon) -> bool {
     let mut rng = thread_rng();
 
     let mut transition_value: u32 = rng.gen_range(0..moon.transition_range);
@@ -164,9 +167,11 @@ fn handle_house(moon: &mut Moon) {
         moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
 
         info!("Moon transitioned to House {}", moon.house);
+        true
     } else {
         moon.transition_range += 1;
-    };
+        false
+    }
 }
 
 fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> MoonHouse {
@@ -192,12 +197,40 @@ fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u
     new_house
 }
 
+/// system resource for one-shot
+#[derive(Resource, Debug)]
+struct ExaltSystem(SystemId);
+
+/// What the resource returns when initialised from the world
+impl FromWorld for ExaltSystem {
+    fn from_world(world: &mut World) -> Self {
+        let system_id = world.register_system(exalt_house_members);
+
+        ExaltSystem(system_id)
+    }
+}
+
+/// Basic implementation of a one-shot system to see how they work
+fn exalt_house_members(
+    person_query: Query<(&Name, &AssignedMoonHouse), With<Alive>>,
+    moon_query: Query<&Moon>,
+) {
+    let moon = moon_query.get_single().unwrap();
+
+    for (name, house) in &person_query {
+        if house.house == moon.house {
+            info!("{} exalts {} {}", moon.house, name.first, name.last);
+        }
+    }
+}
+
 pub struct MoonPlugin;
 
 impl Plugin for MoonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, add_moon);
         app.add_systems(Update, handle_moon.run_if(in_state(RunState::Running)));
+        app.init_resource::<ExaltSystem>(); // for the exalt one-shot
     }
 }
 
@@ -225,12 +258,20 @@ fn add_moon(mut commands: Commands) {
     ));
 }
 
-fn handle_moon(mut query: Query<&mut Moon>) {
+fn handle_moon(
+    mut query: Query<&mut Moon>,
+    mut commands: Commands,
+    exalt_system: Res<ExaltSystem>,
+) {
     let mut moon = query.single_mut();
 
     moon.phase = moon.phase.next();
 
-    handle_house(&mut moon);
+    let house_transition = handle_house(&mut moon);
+
+    if house_transition {
+        commands.run_system(exalt_system.0);
+    }
 
     info!("{} Moon in High House {}", moon.phase, moon.house);
 }
