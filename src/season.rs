@@ -13,9 +13,9 @@ enum Season {
 }
 
 impl Season {
-    pub fn next(&self) -> Self {
+    pub fn next(self) -> Self {
         use Season::{Autumn, Spring, Summer, Winter};
-        match *self {
+        match self {
             Summer => Autumn,
             Autumn => Winter,
             Winter => Spring,
@@ -53,9 +53,11 @@ fn add_season(mut commands: Commands) {
 
 fn handle_season(mut season_query: Query<&mut Season>, calendar_query: Query<&Calendar>) {
     let calendar = calendar_query.single();
+    // why do we get the season but then re-set it?
+    // Should use a one-shot system or something to update the season when specific months change
     let mut season = season_query.single_mut();
 
     *season = Season::month_to_season(calendar.month);
 
-    debug!("{:?}", *season);
+    debug!("The current season is: {:?}", *season);
 }

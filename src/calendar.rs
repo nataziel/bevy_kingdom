@@ -50,12 +50,12 @@ impl fmt::Display for MonthName {
 }
 
 impl MonthName {
-    pub fn next(&self) -> Self {
+    pub fn next(self) -> Self {
         use MonthName::{
             Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
             SansCulottides, Termidor, Vendemiaire, Ventose,
         };
-        match *self {
+        match self {
             Messidor => Termidor,
             Termidor => Fructidor,
             Fructidor => Vendemiaire,
