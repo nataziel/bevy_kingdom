@@ -22,8 +22,9 @@ pub struct Royalty {
 }
 
 fn detail_royalty(query: Query<(&Name, &Age, &Royalty), (With<Person>, With<Alive>)>) {
+    // something strange is happening here when all the royals die
     debug!("~~ Current Royalty ~~");
-    for (name, age, royalty) in &query {
+    for (name, age, royalty) in query.iter() {
         info!(
             "{:?}: {} {} ({})",
             royalty.title, name.first, name.last, age

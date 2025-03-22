@@ -1,4 +1,4 @@
-use crate::{moon::MoonHouse, people::Name, state::RunState};
+use crate::{moon::MoonHouse, people::Name, royalty::Royalty, state::RunState};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
@@ -37,21 +37,31 @@ impl CheatDeathEvent {
 fn handle_death(
     mut commands: Commands,
     mut ev_death: EventReader<DeathEvent>,
-    query: Query<&Name, With<Alive>>,
+    query: Query<(&Name, Option<&Royalty>), With<Alive>>,
 ) {
     for event in ev_death.read() {
-        let name = query.get(event.dying).unwrap();
-        debug!("Handling death event for {} {}", name.first, name.last);
+        if let Ok((name, royalty)) = query.get(event.dying) {
+            debug!("Handling death event for {} {}", name.first, name.last);
 
-        commands
-            .entity(event.dying)
-            .remove::<Alive>()
-            .insert(Deceased);
+            commands
+                .entity(event.dying)
+                .remove::<Alive>()
+                .insert(Deceased);
 
-        info!(
-            "{} {} died. Cause of death: {}",
-            name.first, name.last, event.cause
-        );
+            info!(
+                "{} {} died. Cause of death: {}",
+                name.first, name.last, event.cause
+            );
+
+            if let Some(royalty) = royalty {
+                info!(
+                    "{} {} is a {:?}! We gotta handle royal death",
+                    name.first, name.last, royalty.title
+                );
+            }
+        } else {
+            debug!("Can't handle death event for {}, they're probably already dead!", event.dying)
+        }
 
         // TODO: make the parents/siblings/children sad
     }
