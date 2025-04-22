@@ -1,4 +1,9 @@
-use crate::{moon::MoonHouse, people::Name, royalty::Royalty, state::RunState};
+use crate::{
+    moon::MoonHouse,
+    people::{Name, PersonBundle},
+    royalty::Royalty,
+    state::RunState,
+};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
@@ -60,7 +65,10 @@ fn handle_death(
                 );
             }
         } else {
-            debug!("Can't handle death event for {}, they're probably already dead!", event.dying)
+            debug!(
+                "Can't handle death event for {}, they're probably already dead!",
+                event.dying
+            )
         }
 
         // TODO: make the parents/siblings/children sad
@@ -93,4 +101,53 @@ impl Plugin for LifePlugin {
         .add_event::<DeathEvent>()
         .add_event::<CheatDeathEvent>();
     }
+}
+
+#[test]
+fn test_handle_death() {
+    let mut app = App::new();
+
+    app.add_event::<DeathEvent>();
+
+    app.add_systems(Update, handle_death);
+
+    let test_entity = app
+        .world_mut()
+        .spawn((
+            Alive,
+            Name {
+                first: "test".into(),
+                last: "guy".into(),
+            },
+        ))
+        .id();
+
+    app.world_mut()
+        .resource_mut::<Events<DeathEvent>>()
+        .send(DeathEvent::new(test_entity, "Test"));
+
+    app.update();
+
+    assert!(app.world().get::<Alive>(test_entity).is_none());
+    assert!(app.world().get::<Deceased>(test_entity).is_some());
+}
+
+#[test]
+fn test_handle_death_already_dead() {
+    let mut app = App::new();
+
+    app.add_event::<DeathEvent>();
+
+    app.add_systems(Update, handle_death);
+
+    let test_entity = app.world_mut().spawn(Deceased).id();
+
+    app.world_mut()
+        .resource_mut::<Events<DeathEvent>>()
+        .send(DeathEvent::new(test_entity, "Test"));
+
+    app.update();
+
+    assert!(app.world().get::<Alive>(test_entity).is_none());
+    assert!(app.world().get::<Deceased>(test_entity).is_some());
 }
