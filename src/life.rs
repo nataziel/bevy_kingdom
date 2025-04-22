@@ -1,9 +1,4 @@
-use crate::{
-    moon::MoonHouse,
-    people::{Name, PersonBundle},
-    royalty::Royalty,
-    state::RunState,
-};
+use crate::{moon::MoonHouse, people::Name, royalty::Royalty, state::RunState};
 use bevy::prelude::*;
 
 #[derive(Component, Debug)]
