@@ -1,4 +1,4 @@
-use crate::life::{CheatDeathEvent, DeathEvent};
+use crate::life::{Alive, CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
 use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
 use crate::state::RunState;
@@ -263,4 +263,58 @@ impl Plugin for ReproductionPlugin {
         .add_event::<SuccessfulBirthEvent>()
         .add_event::<UnsuccessfulBirthEvent>();
     }
+}
+
+#[test]
+fn test_new_pregnancy() {
+    let mut app = App::new();
+
+    let father = app.world_mut().spawn(Alive).id();
+
+    let got = Pregnancy::new(25, 1, father);
+
+    assert!(got.mean_term == 25);
+    assert!(got.std_term == 1);
+    assert!(got.father == father);
+    assert!(got.progress == 0);
+}
+
+#[test]
+fn test_handle_pregnancy() {
+    let mut app = App::new();
+
+    app.add_event::<GiveBirthEvent>();
+    app.add_systems(Update, handle_pregnancy);
+
+    let father = app.world_mut().spawn(Alive).id();
+
+    let mother = app
+        .world_mut()
+        .spawn((
+            Pregnancy {
+                mean_term: 2,
+                std_term: 0,
+                term: 2,
+                progress: 0,
+                father
+            },
+            Person,
+            Alive,
+            ChildBearing,
+            Name {
+                first: "test".into(),
+                last: "mother".into(),
+            },
+        ))
+        .id();
+
+    assert!(app.world().get::<Pregnancy>(mother).unwrap().progress == 0);
+
+    app.update();
+
+    assert!(app.world().get::<Pregnancy>(mother).unwrap().progress == 1);
+
+    app.update();
+    
+    // TODO: check that the GiveBirthEvent is sent
 }
