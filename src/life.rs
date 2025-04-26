@@ -98,51 +98,56 @@ impl Plugin for LifePlugin {
     }
 }
 
-#[test]
-fn test_handle_death() {
-    let mut app = App::new();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    app.add_event::<DeathEvent>();
+    #[test]
+    fn test_handle_death() {
+        let mut app = App::new();
 
-    app.add_systems(Update, handle_death);
+        app.add_event::<DeathEvent>();
 
-    let test_entity = app
-        .world_mut()
-        .spawn((
-            Alive,
-            Name {
-                first: "test".into(),
-                last: "guy".into(),
-            },
-        ))
-        .id();
+        app.add_systems(Update, handle_death);
 
-    app.world_mut()
-        .resource_mut::<Events<DeathEvent>>()
-        .send(DeathEvent::new(test_entity, "Test"));
+        let test_entity = app
+            .world_mut()
+            .spawn((
+                Alive,
+                Name {
+                    first: "test".into(),
+                    last: "guy".into(),
+                },
+            ))
+            .id();
 
-    app.update();
+        app.world_mut()
+            .resource_mut::<Events<DeathEvent>>()
+            .send(DeathEvent::new(test_entity, "Test"));
 
-    assert!(app.world().get::<Alive>(test_entity).is_none());
-    assert!(app.world().get::<Deceased>(test_entity).is_some());
-}
+        app.update();
 
-#[test]
-fn test_handle_death_already_dead() {
-    let mut app = App::new();
+        assert!(app.world().get::<Alive>(test_entity).is_none());
+        assert!(app.world().get::<Deceased>(test_entity).is_some());
+    }
 
-    app.add_event::<DeathEvent>();
+    #[test]
+    fn test_handle_death_already_dead() {
+        let mut app = App::new();
 
-    app.add_systems(Update, handle_death);
+        app.add_event::<DeathEvent>();
 
-    let test_entity = app.world_mut().spawn(Deceased).id();
+        app.add_systems(Update, handle_death);
 
-    app.world_mut()
-        .resource_mut::<Events<DeathEvent>>()
-        .send(DeathEvent::new(test_entity, "Test"));
+        let test_entity = app.world_mut().spawn(Deceased).id();
 
-    app.update();
+        app.world_mut()
+            .resource_mut::<Events<DeathEvent>>()
+            .send(DeathEvent::new(test_entity, "Test"));
 
-    assert!(app.world().get::<Alive>(test_entity).is_none());
-    assert!(app.world().get::<Deceased>(test_entity).is_some());
+        app.update();
+
+        assert!(app.world().get::<Alive>(test_entity).is_none());
+        assert!(app.world().get::<Deceased>(test_entity).is_some());
+    }
 }

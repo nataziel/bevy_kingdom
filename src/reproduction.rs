@@ -1,4 +1,4 @@
-use crate::life::{Alive, CheatDeathEvent, DeathEvent};
+use crate::life::{CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
 use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
 use crate::state::RunState;
@@ -265,56 +265,63 @@ impl Plugin for ReproductionPlugin {
     }
 }
 
-#[test]
-fn test_new_pregnancy() {
-    let mut app = App::new();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::life::Alive;
+    use crate::people::Name;
 
-    let father = app.world_mut().spawn(Alive).id();
+    #[test]
+    fn test_new_pregnancy() {
+        let mut app = App::new();
 
-    let got = Pregnancy::new(25, 1, father);
+        let father = app.world_mut().spawn_empty().id();
 
-    assert!(got.mean_term == 25);
-    assert!(got.std_term == 1);
-    assert!(got.father == father);
-    assert!(got.progress == 0);
-}
+        let got = Pregnancy::new(25, 1, father);
 
-#[test]
-fn test_handle_pregnancy() {
-    let mut app = App::new();
+        assert_eq!(got.mean_term, 25);
+        assert_eq!(got.std_term, 1);
+        assert_eq!(got.father, father);
+        assert_eq!(got.progress, 0);
+    }
 
-    app.add_event::<GiveBirthEvent>();
-    app.add_systems(Update, handle_pregnancy);
+    #[test]
+    fn test_handle_pregnancy() {
+        let mut app = App::new();
 
-    let father = app.world_mut().spawn(Alive).id();
+        app.add_event::<GiveBirthEvent>();
+        app.add_systems(Update, handle_pregnancy);
 
-    let mother = app
-        .world_mut()
-        .spawn((
-            Pregnancy {
-                mean_term: 2,
-                std_term: 0,
-                term: 2,
-                progress: 0,
-                father,
-            },
-            Person,
-            Alive,
-            ChildBearing,
-            Name {
-                first: "test".into(),
-                last: "mother".into(),
-            },
-        ))
-        .id();
+        let father = app.world_mut().spawn_empty().id();
 
-    assert!(app.world().get::<Pregnancy>(mother).unwrap().progress == 0);
+        let mother = app
+            .world_mut()
+            .spawn((
+                Pregnancy {
+                    mean_term: 2,
+                    std_term: 0,
+                    term: 2,
+                    progress: 0,
+                    father,
+                },
+                Person,
+                Alive,
+                ChildBearing,
+                Name {
+                    first: "test".into(),
+                    last: "mother".into(),
+                },
+            ))
+            .id();
 
-    app.update();
+        assert_eq!(app.world().get::<Pregnancy>(mother).unwrap().progress, 0);
 
-    assert!(app.world().get::<Pregnancy>(mother).unwrap().progress == 1);
+        app.update();
 
-    app.update();
+        assert_eq!(app.world().get::<Pregnancy>(mother).unwrap().progress, 1);
 
-    // TODO: check that the GiveBirthEvent is sent
+        app.update();
+
+        // TODO: check that the GiveBirthEvent is sent
+    }
 }
