@@ -73,9 +73,9 @@ fn handle_death(
 fn handle_cheat_death(
     mut ev_cheat_death: EventReader<CheatDeathEvent>,
     query: Query<&Name, With<Alive>>,
-) {
+) -> Result {
     for event in ev_cheat_death.read() {
-        let name = query.get(event.cheater).unwrap();
+        let name = query.get(event.cheater)?;
         debug!(
             "Handling cheat death event for {} {}",
             name.first, name.last
@@ -83,6 +83,8 @@ fn handle_cheat_death(
         // TODO: make the houses get mad at each other?
         // When someone cheats death, house death gets mad at the house that helped them
     }
+
+    Ok(())
 }
 
 pub struct LifePlugin;

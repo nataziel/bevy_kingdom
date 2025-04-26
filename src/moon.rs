@@ -149,7 +149,7 @@ impl fmt::Display for MoonHouse {
     }
 }
 
-fn handle_house(moon: &mut Moon) -> bool {
+fn handle_house(moon: &mut Moon) -> Result<bool> {
     let mut rng = thread_rng();
 
     let mut transition_value: u32 = rng.gen_range(0..moon.transition_range);
@@ -164,24 +164,23 @@ fn handle_house(moon: &mut Moon) -> bool {
             info!("House transitioned early due to the New Moon!");
         }
         moon.transition_range = TRANSITION_RANGE_START;
-        moon.house = transition_moon_house(&mut rng, &mut moon.house_weights);
+        moon.house = transition_moon_house(&mut rng, &mut moon.house_weights)?;
 
         info!("Moon transitioned to House {}", moon.house);
-        true
+        Ok(true)
     } else {
         moon.transition_range += 1;
-        false
+        Ok(false)
     }
 }
 
-fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> MoonHouse {
+fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> Result<MoonHouse>{
     // Turn weights into a collection we can use choose_weighted on
     let weights_collection: Vec<(MoonHouse, u32)> = weights.clone().into_iter().collect();
 
     // choose the new house based on the weights
     let new_house: MoonHouse = weights_collection
-        .choose_weighted(rng, |item| item.1)
-        .unwrap()
+        .choose_weighted(rng, |item| item.1)?
         .0
         .clone();
 
@@ -194,7 +193,7 @@ fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u
         };
     }
 
-    new_house
+    Ok(new_house)
 }
 
 /// system resource for one-shot
@@ -262,16 +261,18 @@ fn handle_moon(
     mut query: Query<&mut Moon>,
     mut commands: Commands,
     exalt_system: Res<ExaltSystem>,
-) {
-    let mut moon = query.single_mut().unwrap();
+) -> Result {
+    let mut moon = query.single_mut()?;
 
     moon.phase = moon.phase.next();
 
-    let house_transition = handle_house(&mut moon);
+    let house_transition = handle_house(&mut moon)?;
 
     if house_transition {
         commands.run_system(exalt_system.0);
     }
 
     info!("{} Moon in High House {}", moon.phase, moon.house);
+
+    Ok(())
 }

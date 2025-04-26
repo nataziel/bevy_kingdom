@@ -150,8 +150,8 @@ fn add_calendar(mut commands: Commands) {
     commands.spawn(calendar);
 }
 
-fn advance_date(mut query: Query<&mut Calendar>) {
-    let mut calendar = query.single_mut().unwrap();
+fn advance_date(mut query: Query<&mut Calendar>) -> Result {
+    let mut calendar = query.single_mut()?;
 
     handle_months(&mut calendar);
 
@@ -159,6 +159,8 @@ fn advance_date(mut query: Query<&mut Calendar>) {
 
     debug!("{:?}", calendar); // can probably remove this at some point
     info!("{}", *calendar);
+
+    Ok(())
 }
 
 fn handle_months(calendar: &mut Mut<'_, Calendar>) {

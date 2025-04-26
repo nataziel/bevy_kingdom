@@ -22,18 +22,18 @@ pub struct Pregnancy {
 }
 
 impl Pregnancy {
-    pub fn new(mean_term: i32, std_term: i32, father: Entity) -> Self {
+    pub fn new(mean_term: i32, std_term: i32, father: Entity) -> Result<Self> {
         let mut rng = thread_rng();
-        let norm_dist = Normal::new(mean_term.into(), std_term.into()).unwrap();
+        let norm_dist = Normal::new(mean_term.into(), std_term.into())?;
         let term = norm_dist.sample(&mut rng) as i32;
 
-        Pregnancy {
+        Ok(Pregnancy {
             mean_term,
             std_term,
             term,
             progress: 0,
             father,
-        }
+        })
     }
 }
 
@@ -89,7 +89,7 @@ fn handle_give_birth(
     mut ev_unsuccessful_birth: EventWriter<UnsuccessfulBirthEvent>,
     query_moon: Query<&Moon>,
     query_assigned_house: Query<&AssignedMoonHouse>,
-) {
+) -> Result {
     for event in ev_give_birth.read() {
         debug!("Handling give_birth for {}", event.mother);
         commands.entity(event.mother).remove::<Pregnancy>();
@@ -98,19 +98,15 @@ fn handle_give_birth(
         debug!("Term_Diff: {}", term_diff);
         let problem_dist =
             // double the standard deviation just to make it less likely there are problems
-            Normal::new(event.mean_term.into(), (2 * event.std_term).into()).unwrap();
+            Normal::new(event.mean_term.into(), (2 * event.std_term).into())?;
         let pdf_at_sample = problem_dist.pdf(event.progress.into());
         debug!("pdf_at_sample: {}", pdf_at_sample);
         let pdf_at_mean = problem_dist.pdf(event.mean_term.into());
         debug!("pdf_at_mean: {}", pdf_at_mean);
         let mut raw_p = pdf_at_sample / pdf_at_mean;
 
-        let mother_house = query_assigned_house
-            .get(event.mother)
-            .unwrap()
-            .house
-            .clone();
-        let current_moon_house = query_moon.single().unwrap().house.clone();
+        let mother_house = query_assigned_house.get(event.mother)?.house.clone();
+        let current_moon_house = query_moon.single()?.house.clone();
         if mother_house == current_moon_house {
             debug!("Mother giving birth in favoured house {}", mother_house);
             // 10% more likely to successfully give birth
@@ -122,7 +118,7 @@ fn handle_give_birth(
         }
 
         let mut rng = thread_rng();
-        let bernoulli_dist = Bernoulli::new(raw_p).unwrap();
+        let bernoulli_dist = Bernoulli::new(raw_p)?;
         let successful_birth = bernoulli_dist.sample(&mut rng);
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
@@ -139,6 +135,7 @@ fn handle_give_birth(
             });
         }
     }
+    Ok(())
 }
 
 fn handle_successful_birth(
@@ -147,7 +144,7 @@ fn handle_successful_birth(
     mut query_parents: Query<(&mut Children, &Name)>,
     mut query_siblings: Query<&mut Siblings>,
     query_moon: Query<&Moon>,
-) {
+) -> Result {
     for event in ev_successful_birth.read() {
         // create a set of parents for the new child
         let new_child_parents = HashSet::from([event.mother, event.father]);
@@ -167,7 +164,7 @@ fn handle_successful_birth(
             }
         }
 
-        let moon = query_moon.single().unwrap();
+        let moon = query_moon.single()?;
 
         // TODO: generalise this
         let new_child = commands
@@ -196,6 +193,7 @@ fn handle_successful_birth(
             siblings_of_sibling.set.insert(new_child);
         }
     }
+    Ok(())
 }
 
 fn handle_unsuccessful_birth(
@@ -204,13 +202,13 @@ fn handle_unsuccessful_birth(
     mut ev_cheated_death: EventWriter<CheatDeathEvent>,
     query_moon: Query<&Moon>,
     query_mother: Query<(&Name, &AssignedMoonHouse)>,
-) {
+) -> Result {
     // TODO: make some fucked up shit happen
     // mum dies? baby dies? :(
-    let current_moon_house = &query_moon.single().unwrap().house;
+    let current_moon_house = &query_moon.single()?.house;
 
     for event in ev_unsuccessful_birth.read() {
-        let (name, mother_assigned_house) = query_mother.get(event.mother).unwrap();
+        let (name, mother_assigned_house) = query_mother.get(event.mother)?;
         debug!(
             "Handling unsuccessful birth for {} {}",
             name.first, name.last
@@ -223,7 +221,7 @@ fn handle_unsuccessful_birth(
         if event.term_diff >= 0 {
             if in_favoured {
                 let mut rng = thread_rng();
-                let bernoulli_dist = Bernoulli::new(0.1).unwrap();
+                let bernoulli_dist = Bernoulli::new(0.1)?;
                 let cheated_death = bernoulli_dist.sample(&mut rng);
                 debug!("Outcome of cheat death bernoulli trial {}", cheated_death);
                 if cheated_death {
@@ -231,7 +229,7 @@ fn handle_unsuccessful_birth(
                         event.mother,
                         mother_assigned_house.house.clone(),
                     ));
-                    return;
+                    return Ok(());
                 }
             }
 
@@ -244,6 +242,7 @@ fn handle_unsuccessful_birth(
             // TODO: make both mum and dad be sad
         }
     }
+    Ok(())
 }
 
 pub struct ReproductionPlugin;
@@ -277,7 +276,7 @@ mod tests {
 
         let father = app.world_mut().spawn_empty().id();
 
-        let got = Pregnancy::new(25, 1, father);
+        let got = Pregnancy::new(25, 1, father).unwrap();
 
         assert_eq!(got.mean_term, 25);
         assert_eq!(got.std_term, 1);

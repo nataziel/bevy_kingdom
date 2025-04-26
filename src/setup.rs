@@ -126,7 +126,7 @@ fn create_initial_people(mut commands: Commands) {
     }
 }
 
-fn add_custom_people(mut commands: Commands) {
+fn add_custom_people(mut commands: Commands) -> Result {
     let jack = commands
         .spawn((
             PersonBundle::initial_people("Jack", "Allan", MoonHouse::Death, 12000),
@@ -138,7 +138,7 @@ fn add_custom_people(mut commands: Commands) {
         .spawn((
             PersonBundle::initial_people("Paulina", "Morales-Allan", MoonHouse::Storm, 10555),
             ChildBearing,
-            Pregnancy::new(HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, jack),
+            Pregnancy::new(HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, jack)?,
             Royalty {
                 title: Title::Queen,
             },
@@ -209,6 +209,8 @@ fn add_custom_people(mut commands: Commands) {
     commands.entity(jacob).insert(Children {
         set: [pepsi].into(),
     });
+
+    Ok(())
 }
 
 pub struct SetupPlugin;
