@@ -1,7 +1,7 @@
 use std::fmt;
 
-use bevy::prelude::*;
 use bevy::platform::collections::HashMap;
+use bevy::prelude::*;
 
 use crate::state::RunState;
 

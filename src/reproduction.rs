@@ -2,7 +2,7 @@ use crate::life::{Alive, CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
 use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
 use crate::state::RunState;
-use bevy::{prelude::*, platform::collections::HashSet};
+use bevy::{platform::collections::HashSet, prelude::*};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
 
@@ -296,7 +296,7 @@ fn test_handle_pregnancy() {
                 std_term: 0,
                 term: 2,
                 progress: 0,
-                father
+                father,
             },
             Person,
             Alive,
@@ -315,6 +315,6 @@ fn test_handle_pregnancy() {
     assert!(app.world().get::<Pregnancy>(mother).unwrap().progress == 1);
 
     app.update();
-    
+
     // TODO: check that the GiveBirthEvent is sent
 }

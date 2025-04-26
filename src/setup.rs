@@ -1,10 +1,10 @@
 use crate::{
     moon::MoonHouse,
     people::{Children, PersonBundle, Siblings},
-    reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD},
+    reproduction::{ChildBearing, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD, Pregnancy},
     royalty::{Royalty, Title},
 };
-use bevy::{prelude::*, platform::collections::HashSet};
+use bevy::{platform::collections::HashSet, prelude::*};
 use rand::prelude::*;
 
 fn create_initial_people(mut commands: Commands) {

@@ -1,6 +1,6 @@
 use bevy::ecs::system::SystemId;
-use bevy::prelude::*;
 use bevy::platform::collections::hash_map::HashMap;
+use bevy::prelude::*;
 use rand::distributions::Standard;
 use rand::prelude::*;
 use std::fmt;

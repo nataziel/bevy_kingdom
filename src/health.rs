@@ -11,7 +11,10 @@ impl Plugin for HealthPlugin {
     }
 }
 
-fn handle_health(query: Query<(Entity, &Royalty, &Name), With<Alive>>, mut ev_death: EventWriter<DeathEvent>) {
+fn handle_health(
+    query: Query<(Entity, &Royalty, &Name), With<Alive>>,
+    mut ev_death: EventWriter<DeathEvent>,
+) {
     // make a royal die to test handling royal death
     // todo: remove the royal stuff and add health handling
     for (entity, royal, name) in query.iter() {
