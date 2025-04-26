@@ -2,7 +2,7 @@ use crate::life::{Alive, CheatDeathEvent, DeathEvent};
 use crate::moon::Moon;
 use crate::people::{AssignedMoonHouse, Children, Name, Person, PersonBundle, Siblings};
 use crate::state::RunState;
-use bevy::{prelude::*, utils::HashSet};
+use bevy::{prelude::*, platform::collections::HashSet};
 use rand::{distributions::Bernoulli, prelude::*};
 use statrs::distribution::{Continuous, Normal};
 
@@ -71,7 +71,7 @@ fn handle_pregnancy(
         );
 
         if pregnancy.progress >= pregnancy.term {
-            ev_give_birth.send(GiveBirthEvent {
+            ev_give_birth.write(GiveBirthEvent {
                 mother,
                 father: pregnancy.father,
                 progress: pregnancy.progress,
@@ -110,7 +110,7 @@ fn handle_give_birth(
             .unwrap()
             .house
             .clone();
-        let current_moon_house = query_moon.single().house.clone();
+        let current_moon_house = query_moon.single().unwrap().house.clone();
         if mother_house == current_moon_house {
             debug!("Mother giving birth in favoured house {}", mother_house);
             // 10% more likely to successfully give birth
@@ -127,12 +127,12 @@ fn handle_give_birth(
         debug!("Outcome of bernoulli trial {}", successful_birth);
 
         if successful_birth {
-            ev_successful_birth.send(SuccessfulBirthEvent {
+            ev_successful_birth.write(SuccessfulBirthEvent {
                 mother: event.mother,
                 father: event.father,
             });
         } else {
-            ev_unsuccessful_birth.send(UnsuccessfulBirthEvent {
+            ev_unsuccessful_birth.write(UnsuccessfulBirthEvent {
                 mother: event.mother,
                 father: event.father,
                 term_diff,
@@ -167,7 +167,7 @@ fn handle_successful_birth(
             }
         }
 
-        let moon = query_moon.single();
+        let moon = query_moon.single().unwrap();
 
         // TODO: generalise this
         let new_child = commands
@@ -207,7 +207,7 @@ fn handle_unsuccessful_birth(
 ) {
     // TODO: make some fucked up shit happen
     // mum dies? baby dies? :(
-    let current_moon_house = &query_moon.single().house;
+    let current_moon_house = &query_moon.single().unwrap().house;
 
     for event in ev_unsuccessful_birth.read() {
         let (name, mother_assigned_house) = query_mother.get(event.mother).unwrap();
@@ -227,7 +227,7 @@ fn handle_unsuccessful_birth(
                 let cheated_death = bernoulli_dist.sample(&mut rng);
                 debug!("Outcome of cheat death bernoulli trial {}", cheated_death);
                 if cheated_death {
-                    ev_cheated_death.send(CheatDeathEvent::new(
+                    ev_cheated_death.write(CheatDeathEvent::new(
                         event.mother,
                         mother_assigned_house.house.clone(),
                     ));
@@ -235,7 +235,7 @@ fn handle_unsuccessful_birth(
                 }
             }
 
-            ev_death.send(DeathEvent::new(event.mother, "Childbirth"));
+            ev_death.write(DeathEvent::new(event.mother, "Childbirth"));
             // TODO: make the dad get sad?
             // TODO: but also maybe you scorn your house for letting your baby die?
             // TODO: or maybe you're grateful your house intervened to let you live

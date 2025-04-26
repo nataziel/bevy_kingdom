@@ -52,10 +52,10 @@ fn add_season(mut commands: Commands) {
 }
 
 fn handle_season(mut season_query: Query<&mut Season>, calendar_query: Query<&Calendar>) {
-    let calendar = calendar_query.single();
+    let calendar = calendar_query.single().unwrap();
     // why do we get the season but then re-set it?
     // Should use a one-shot system or something to update the season when specific months change
-    let mut season = season_query.single_mut();
+    let mut season = season_query.single_mut().unwrap();
 
     *season = Season::month_to_season(calendar.month);
 

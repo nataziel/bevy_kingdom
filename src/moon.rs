@@ -1,6 +1,6 @@
 use bevy::ecs::system::SystemId;
 use bevy::prelude::*;
-use bevy::utils::HashMap;
+use bevy::platform::collections::hash_map::HashMap;
 use rand::distributions::Standard;
 use rand::prelude::*;
 use std::fmt;
@@ -215,7 +215,7 @@ fn exalt_house_members(
     person_query: Query<(&Name, &AssignedMoonHouse), With<Alive>>,
     moon_query: Query<&Moon>,
 ) {
-    let moon = moon_query.get_single().unwrap();
+    let moon = moon_query.single().unwrap();
 
     for (name, house) in &person_query {
         if house.house == moon.house {
@@ -263,7 +263,7 @@ fn handle_moon(
     mut commands: Commands,
     exalt_system: Res<ExaltSystem>,
 ) {
-    let mut moon = query.single_mut();
+    let mut moon = query.single_mut().unwrap();
 
     moon.phase = moon.phase.next();
 

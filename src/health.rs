@@ -19,6 +19,6 @@ fn handle_health(query: Query<(Entity, &Royalty, &Name), With<Alive>>, mut ev_de
             "Sending death event for {} {}, the {:?}",
             name.first, name.last, royal.title
         );
-        ev_death.send(DeathEvent::new(entity, "Royal"));
+        ev_death.write(DeathEvent::new(entity, "Royal"));
     }
 }

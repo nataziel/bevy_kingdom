@@ -4,7 +4,7 @@ use crate::{
     reproduction::{ChildBearing, Pregnancy, HUMAN_PREGNANCY_LENGTH, HUMAN_PREGNANCY_STD},
     royalty::{Royalty, Title},
 };
-use bevy::{prelude::*, utils::HashSet};
+use bevy::{prelude::*, platform::collections::HashSet};
 use rand::prelude::*;
 
 fn create_initial_people(mut commands: Commands) {

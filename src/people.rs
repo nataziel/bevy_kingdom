@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashSet};
+use bevy::{prelude::*, platform::collections::HashSet};
 
 use crate::age::Age;
 use crate::life::Alive;

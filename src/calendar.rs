@@ -1,7 +1,7 @@
 use std::fmt;
 
 use bevy::prelude::*;
-use bevy::utils::HashMap;
+use bevy::platform::collections::HashMap;
 
 use crate::state::RunState;
 
@@ -151,7 +151,7 @@ fn add_calendar(mut commands: Commands) {
 }
 
 fn advance_date(mut query: Query<&mut Calendar>) {
-    let mut calendar = query.single_mut();
+    let mut calendar = query.single_mut().unwrap();
 
     handle_months(&mut calendar);
 
