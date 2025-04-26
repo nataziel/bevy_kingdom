@@ -73,7 +73,7 @@ impl MonthName {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, PartialEq)]
 pub struct Calendar {
     year: u32,
     year_day: u32,
@@ -189,5 +189,79 @@ fn handle_years(calendar: &mut Mut<'_, Calendar>) {
             calendar.year - 1,
             calendar.year
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::calendar::MonthName::*;
+
+    #[test]
+    fn test_add_calendar() {
+        let mut app = App::new();
+
+        app.add_systems(Startup, add_calendar);
+
+        app.update();
+
+        let mut query_state = app.world_mut().query::<&Calendar>();
+
+        let binding = query_state.query(app.world_mut());
+        let calendar = binding.single().unwrap();
+
+        let mut month_map: HashMap<MonthName, u32> = HashMap::new();
+        month_map.insert(Messidor, 30);
+        month_map.insert(Termidor, 30);
+        month_map.insert(Fructidor, 30);
+        month_map.insert(Vendemiaire, 30);
+        month_map.insert(Brumaire, 30);
+        month_map.insert(Frimaire, 30);
+        month_map.insert(Nivose, 30);
+        month_map.insert(Pluviose, 30);
+        month_map.insert(Ventose, 30);
+        month_map.insert(Germinal, 30);
+        month_map.insert(Floreal, 30);
+        month_map.insert(Prairial, 30);
+        month_map.insert(SansCulottides, 5);
+
+        assert_eq!(
+            calendar,
+            &Calendar::new(0, 0, Messidor, 0, YEAR_LENGTH, month_map)
+        );
+    }
+
+    #[test]
+    fn test_advance_date() {
+        let mut app = App::new();
+
+        app.add_systems(Startup, add_calendar);
+        app.add_systems(Update, advance_date);
+
+        app.update();
+
+        let mut query_state = app.world_mut().query::<&Calendar>();
+
+        let binding = query_state.query(app.world_mut());
+        let calendar = binding.single().unwrap();
+
+        assert_eq!(calendar.month_day, 1);
+
+        app.update();
+
+        let binding = query_state.query(app.world_mut());
+        let calendar = binding.single().unwrap();
+
+        assert_eq!(calendar.month_day, 2);
+    }
+
+    #[test]
+    fn test_handle_month() {
+        todo!()
+    }
+
+    #[test]
+    fn test_handle_years() {
+        todo!()
     }
 }

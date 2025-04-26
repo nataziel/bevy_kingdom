@@ -103,6 +103,7 @@ impl Plugin for LifePlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::people::Name;
 
     #[test]
     fn test_handle_death() {
