@@ -174,7 +174,10 @@ fn handle_house(moon: &mut Moon) -> Result<bool> {
     }
 }
 
-fn transition_moon_house(rng: &mut ThreadRng, weights: &mut HashMap<MoonHouse, u32>) -> Result<MoonHouse>{
+fn transition_moon_house(
+    rng: &mut ThreadRng,
+    weights: &mut HashMap<MoonHouse, u32>,
+) -> Result<MoonHouse> {
     // Turn weights into a collection we can use choose_weighted on
     let weights_collection: Vec<(MoonHouse, u32)> = weights.clone().into_iter().collect();
 
