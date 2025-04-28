@@ -129,20 +129,21 @@ fn add_calendar(mut commands: Commands) {
         Brumaire, Floreal, Frimaire, Fructidor, Germinal, Messidor, Nivose, Pluviose, Prairial,
         SansCulottides, Termidor, Vendemiaire, Ventose,
     };
-    let mut month_map: HashMap<MonthName, u32> = HashMap::new();
-    month_map.insert(Messidor, 30);
-    month_map.insert(Termidor, 30);
-    month_map.insert(Fructidor, 30);
-    month_map.insert(Vendemiaire, 30);
-    month_map.insert(Brumaire, 30);
-    month_map.insert(Frimaire, 30);
-    month_map.insert(Nivose, 30);
-    month_map.insert(Pluviose, 30);
-    month_map.insert(Ventose, 30);
-    month_map.insert(Germinal, 30);
-    month_map.insert(Floreal, 30);
-    month_map.insert(Prairial, 30);
-    month_map.insert(SansCulottides, 5);
+    let month_map: HashMap<MonthName, u32> = HashMap::from([
+        (Messidor, 30),
+        (Termidor, 30),
+        (Fructidor, 30),
+        (Vendemiaire, 30),
+        (Brumaire, 30),
+        (Frimaire, 30),
+        (Nivose, 30),
+        (Pluviose, 30),
+        (Ventose, 30),
+        (Germinal, 30),
+        (Floreal, 30),
+        (Prairial, 30),
+        (SansCulottides, 5),
+    ]);
 
     let calendar = Calendar::new(0, 0, Messidor, 0, YEAR_LENGTH, month_map);
     debug!("{:?}", &calendar);
